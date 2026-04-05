@@ -23,19 +23,6 @@ wheels/
 venv/
 ENV/
 
-# Node / React Native
-frontend/mobile/node_modules/
-frontend/mobile/.expo/
-frontend/mobile/.expo-shared/
-frontend/mobile/npm-debug.*
-frontend/mobile/*.jks
-frontend/mobile/*.p8
-frontend/mobile/*.p12
-frontend/mobile/*.key
-frontend/mobile/*.mobileprovision
-frontend/mobile/*.orig.*
-frontend/mobile/web-build/
-
 # macOS
 .DS_Store
 
@@ -57,6 +44,15 @@ results/
 
 # Data cache
 stockbuddy/dataflows/data_cache/
+
+# Root-only: run outputs (package code lives in stockbuddy/experiments/)
+/experiments/
+
+# Local embeddings / vector store
+stockbuddy/data/
+
+# Cursor IDE (local)
+.cursor/
 
 # Package lock files (optional, remove if you want to track them)
 # package-lock.json

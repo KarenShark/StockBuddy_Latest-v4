@@ -1,6 +1,5 @@
 """
-FastAPI Backend for StockBuddy Mobile App
-提供 REST API 接口，供移动端调用
+FastAPI backend for StockBuddy (optional HTTP API).
 """
 
 import sys
@@ -239,7 +238,7 @@ async def delete_task(task_id: str):
 
 
 if __name__ == "__main__":
-    # 获取本机IP地址（用于移动端访问）
+    # LAN IP for clients on same network
     import socket
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
@@ -248,13 +247,13 @@ if __name__ == "__main__":
     print(f"StockBuddy API Server Starting...")
     print(f"{'='*60}")
     print(f"Local access: http://localhost:8000")
-    print(f"Mobile access (same WiFi): http://{local_ip}:8000")
+    print(f"LAN access (same WiFi): http://{local_ip}:8000")
     print(f"API docs: http://localhost:8000/docs")
     print(f"{'='*60}\n")
     
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",  # 允许外部访问
+        host="0.0.0.0",
         port=8000,
         reload=True  # 开发模式自动重载
     )

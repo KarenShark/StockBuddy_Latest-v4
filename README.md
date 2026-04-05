@@ -1,189 +1,125 @@
-# Multi-Agent AI Trading Assistant for Hong Kong Retail Traders
+# StockBuddy
 
-> 🎉 **StockBuddy** - Your intelligent trading companion powered by multi-agent LLM framework.
+**Explainable multi-agent decision support for Hong Kong equities** — sequential orchestration, tool-grounded reports, and a terminal-first workflow (not a heavy dashboard or a generic chat shell).
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/KarenShark/StockBuddy_Latest-v4.git)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/KarenShark/StockBuddy_Latest-v4)
 
-A multi-agent collaborative framework powered by large language models, featuring 13 specialized agents that work together to analyze stocks and generate trading decisions.
+## What makes this different
 
-## Core Features
+| Typical “AI trading” demos | StockBuddy |
+|----------------------------|------------|
+| Opaque chat or single-model calls | **Layered pipeline**: analysts → bull/bear debate & research manager → trader → risk stances → portfolio gate |
+| Return-only storytelling | **Structured artifacts** (Markdown reports + machine-readable signals) suited to audit and formal evaluation |
+| Web/mobile-first UX | **Terminal-first**: lower overhead, visible progress (Rich live layout), aligned with research workflow |
+| Free-form Q&A | **Follow-up mode grounded on the run’s outputs** — not a standalone financial chatbot |
 
-- **13 Specialized Agents**: Market Analyst, News Analyst, Fundamentals Analyst, Social Media Analyst, Bull/Bear Researchers, Research Manager, Trader, Aggressive/Conservative/Neutral Risk Analysts, Risk Manager, Portfolio Manager
-- **Multi-Market Support**: Hong Kong Stock Exchange (HKEX) and US markets, with automatic ticker recognition
-- **Multiple Data Sources**: yfinance, Alpha Vantage, Google News, Finnhub, Newsdata.io
-- **Multiple LLM Support**: OpenAI, Anthropic, Google, OpenRouter, Ollama
-- **Intelligent Debate Mechanism**: Agents optimize trading strategies through structured debates
-- **Comprehensive Reports**: Generates technical analysis, news analysis, fundamental analysis, sentiment analysis, investment plans, and final trading decisions
+**In scope:** single-stock research, mixed HK/US tickers (e.g. `0700` → `0700.HK`), optional HTTP API under `api/`.  
+**Out of scope:** autonomous live trading, broker integration, full portfolio optimization, production mobile app.
 
-## Quick Start
+## How you use it (two modes)
 
-### 1. Requirements
+1. **Research** — Configure provider/models and depth, then run the full graph. You get analyst reports, debate synthesis, trader plan, risk discussion, and a final **BUY / SELL / HOLD** narrative plus saved files under `results/`.
+2. **Follow-up Q&A** — After a successful run, optional Q&A uses the **same run’s artifacts** as context (suggested questions + free text), so answers stay tied to that analysis.
 
-- Python 3.10+
-- OpenAI API Key (required)
-- Conda (recommended) or venv
+**Demo (slides walkthrough):** [YouTube](https://youtu.be/aP9DHNnA0hA)
 
-### 2. Installation
+## Terminal demo (live run — HSBC `0005`, 2024-04-05)
+
+1. **Hub + ticker resolve + date** — ASCII welcome (“Terminal hub”), ticker `0005` resolved to HSBC / HKG, then analysis date (`YYYY-MM-DD`).
+
+![Hub, ticker lookup, date](assets/demo-01-hub-ticker-date.png)
+
+2. **Guided setup** — Pick analyst team (market / social / news / fundamentals), research depth (e.g. Shallow), then LLM provider (OpenAI, Anthropic, Google, OpenRouter, Ollama).
+
+![Analysts, depth, provider](assets/demo-02-analysts-depth-provider.png)
+
+3. **Live board (in progress)** — Left: agent status by team; top-right: reasoning stream; bottom: current report chunk; footer: tool / LLM call counts.
+
+![Live board mid-run](assets/demo-03-live-board-in-progress.png)
+
+4. **Pipeline complete + portfolio narrative** — All agents `completed`; full portfolio-style decision text; session stats; entry into **follow-up Q&A** (English, grounded in this run).
+
+![Portfolio decision and follow-up entry](assets/demo-04-portfolio-decision-complete.png)
+
+5. **Risk-layer report + suggested questions** — Structured risk decision (e.g. accumulate slowly, levels, caveats); menu of **suggested follow-up** prompts tied to the run.
+
+![Risk report and follow-up menu](assets/demo-05-risk-decision-followup-menu.png)
+
+6. **Artifact-grounded Q&A** — Answers cite generated reports (`investment_plan.md`, `fundamentals_report.md`, etc.); custom English questions; honest bounds when a topic is not in the bundle.
+
+![Follow-up Q&A with citations](assets/demo-06-followup-qa-grounded.png)
+
+## Written artifacts (excerpts — `results/0005/2026-04-05/`)
+
+Markdown reports and a tool trace from the same HSBC run; language follows your run settings (here: Traditional Chinese reports).
+
+1. **`final_trade_decision.md`** — Risk-management decision: bull / conservative / neutral synthesis, action (e.g. accumulate slowly), price band, stop, target, holding horizon, risk warnings, conclusion.
+
+![final_trade_decision.md excerpt](assets/artifact-01-final-trade-decision.png)
+
+2. **`fundamentals_report.md`** — Multi-year statements (balance sheet, cash flow, P&L), indicator table, integrated commentary and risk flags.
+
+![fundamentals_report.md excerpt](assets/artifact-02-fundamentals-report.png)
+
+3. **`market_report.md`** — Technicals (SMA/EMA, MACD, RSI, Bollinger), HK market context, recommendation line, summary table, **FINAL TRANSACTION PROPOSAL**.
+
+![market_report.md excerpt](assets/artifact-03-market-report.png)
+
+4. **`message_tool.log`** — Audit-style trace: tool calls (`get_stock_data`, `get_indicators`, news/fundamental tools), planning text, and multi-agent debate snippets (research manager vs risk stances) leading into the final stance.
+
+![message_tool.log excerpt](assets/artifact-04-message-tool-log.png)
+
+## Quick start
+
+**Requirements:** Python 3.10+, LLM API key(s) per provider (OpenAI, Anthropic, Google, OpenRouter, or local Ollama).
 
 ```bash
-# Clone the project
 cd "StockBuddy v4"
-
-# Create conda environment
-conda create -n stockbuddy python=3.10 -y
-conda activate stockbuddy
-
-# Install dependencies
+python -m venv .venv && source .venv/bin/activate   # or conda
 pip install -r requirements.txt
-
-# Install project (optional, for development)
 pip install -e .
+
+cp .env.example .env   # fill keys; never commit .env
 ```
 
-### 3. Configuration
+**Run (interactive CLI + live board):**
 
-Copy `.env.example` to `.env` and fill in your API keys:
-
-```bash
-cp .env.example .env
-```
-
-Then edit `.env` with your API keys:
-
-```bash
-# Required
-OPENAI_API_KEY=your_openai_api_key
-
-# Optional: Data source API keys
-ALPHA_VANTAGE_API_KEY=your_key
-FINNHUB_API_KEY=your_key
-NEWSDATA_API_KEY=your_key
-
-# Optional: Market configuration (default: HKEX)
-DEFAULT_MARKET=HKEX  # or US
-DEFAULT_LANGUAGE=zh_TW  # traditional Chinese, or en
-```
-
-### 4. Run
-
-**Method 1: Using convenience script (recommended)**
 ```bash
 bash start_cli.sh
-```
-
-**Method 2: CLI interactive interface**
-```bash
-conda activate stockbuddy
+# or
 python -m cli.main
 ```
 
-**Method 3: Command line script**
-```bash
-# Interactive mode
-python main.py
+**Run (script-style):**
 
-# Direct arguments
+```bash
 python main.py --ticker 0700 --date 2026-01-24
 ```
 
-**Method 4: Python API**
+**Programmatic:**
+
 ```python
 from stockbuddy.graph.trading_graph import StockBuddyGraph
 from stockbuddy.default_config import DEFAULT_CONFIG
 
-# Initialize
-ta = StockBuddyGraph(debug=True, config=DEFAULT_CONFIG.copy())
-
-# Run analysis (HKEX tickers are automatically recognized, e.g., 0700 → 0700.HK)
-final_state, decision = ta.propagate("0700", "2026-01-24")
-print(decision)
+g = StockBuddyGraph(debug=True, config=DEFAULT_CONFIG.copy())
+final_state, decision = g.propagate("0700", "2026-01-24")
 ```
 
-## Output Results
+## Outputs
 
-Analysis results are saved in `results/[ticker]/[date]/reports/`:
+Under `results/<ticker>/<date>/reports/` (when written): e.g. `market_report.md`, `news_report.md`, `fundamentals_report.md`, `sentiment_report.md`, `investment_plan.md`, `trader_investment_plan.md`, `final_trade_decision.md`.
 
-- `market_report.md` - Technical analysis report
-- `news_report.md` - News impact analysis
-- `fundamentals_report.md` - Fundamental analysis
-- `sentiment_report.md` - Social media sentiment analysis
-- `investment_plan.md` - Research team investment recommendation
-- `trader_investment_plan.md` - Detailed trading plan from trader
-- `final_trade_decision.md` - Final trading decision (BUY/SELL/HOLD)
+Vendors and models are configured in `stockbuddy/default_config.py` and `.env` (see `.env.example`).
 
-## Configuration
+## Evaluation (research artifact)
 
-Main configuration is in `stockbuddy/default_config.py`:
+Formal comparison uses a **fixed historical protocol** and an **adaptation layer** from rich outputs to compact signals (e.g. `decision.json`); evaluation stresses process, behavior, and risk governance — not return alone. Implementation lives under `stockbuddy/evaluation/` and `stockbuddy/experiments/`.
 
-```python
-{
-    "llm_provider": "openai",           # LLM provider
-    "deep_think_llm": "gpt-4o-mini",    # Deep thinking model
-    "quick_think_llm": "gpt-4o-mini",    # Quick thinking model
-    "max_debate_rounds": 1,              # Research team debate rounds
-    "max_risk_discuss_rounds": 1,        # Risk management team discussion rounds
-    "data_vendors": {
-        "core_stock_apis": "yfinance",      # Stock data source
-        "technical_indicators": "yfinance", # Technical indicators data source
-        "fundamental_data": "yfinance",     # Fundamental data source
-        "news_data": "google",               # News data source
-    }
-}
-```
+## Selected references
 
-## Project Structure
-
-```
-stockbuddy/
-├── agents/              # Agent implementations
-│   ├── analysts/        # Analyst team
-│   ├── researchers/    # Research team
-│   ├── trader/         # Trader
-│   ├── managers/       # Management team
-│   └── risk_mgmt/      # Risk management team
-├── graph/              # LangGraph orchestration
-├── dataflows/          # Data source integrations
-└── default_config.py   # Default configuration
-
-cli/                    # CLI interactive interface
-main.py                 # Command line script entry
-start_cli.sh           # Convenience startup script
-```
-
-## References
-
-[1] arXiv, "arXiv:2412.20138," arXiv.org, preprint. https://arxiv.org/abs/2412.20138
-
-[2] Tauric Research, "TradingAgents," GitHub repository (source code). https://github.com/TauricResearch/TradingAgents
-
-[3] Open-Finance-Lab, "AgenticTrading," GitHub repository (source code). https://github.com/Open-Finance-Lab/AgenticTrading
-
-[4] ValueCell-ai, "valuecell," GitHub repository (source code). https://github.com/ValueCell-ai/valuecell.git
-
-[5] R. Ran Aroussi, "yfinance," GitHub repository (source code). https://github.com/ranaroussi/yfinance
-
-[6] NewsData.io, "NewsData.io Documentation," NewsData.io (official documentation). https://newsdata.io/documentation
-
-[7] Finnhub, "Finnhub API Documentation," Finnhub (official documentation). https://finnhub.io/docs/api
-
-[8] Hong Kong Exchanges and Clearing Limited, "HKEXnews," HKEXnews (official information dissemination website). https://www.hkexnews.hk/
-
-[9] Alpha Vantage Inc., "Alpha Vantage API Documentation," Alpha Vantage (official documentation). https://www.alphavantage.co/documentation/
-
-[10] LangChain, "Introduction | LangChain Documentation," LangChain (official documentation). https://python.langchain.com/docs/introduction/
-
-[11] LangGraph, "LangGraph Documentation," LangChain Docs (official documentation). https://docs.langchain.com/langgraph
-
-[12] Backtrader, "Backtrader: Python Backtesting," Backtrader (official website). https://www.backtrader.com/
-
-[13] Textualize, "Rich Documentation," Read the Docs (official documentation). https://rich.readthedocs.io/en/stable/
-
-[14] Hong Kong Exchanges and Clearing Limited, "HKEX," HKEX (official corporate website). https://www.hkex.com.hk/
-
-[15] Hong Kong Exchanges and Clearing Limited, "Trading Mechanism," HKEX (official information page). https://www.hkex.com.hk/Services/Trading/Securities/Overview/Trading-Mechanism
-
-[16] Hong Kong Exchanges and Clearing Limited, "Volatility Control Mechanism in Hong Kong's Securities Market," HKEX (official PDF). https://www.hkex.com.hk/-/media/HKEX-Market/Services/Trading/Securities/Overview/Trading-Mechanism/Trading-Mechanism-for-VCM_E.pdf
+- [TradingAgents](https://github.com/TauricResearch/TradingAgents) · [AgenticTrading](https://github.com/Open-Finance-Lab/AgenticTrading) · [LangGraph](https://docs.langchain.com/langgraph) · [yfinance](https://github.com/ranaroussi/yfinance)
 
 ## Disclaimer
 
-This system is for research and educational purposes only. Trading performance may vary based on many factors, including the chosen language models, model temperature, trading periods, data quality, and other non-deterministic factors. **It is not intended as financial, investment, or trading advice.**
+For **research and education only**. Outputs depend on models, data, and settings and are **not** financial, investment, or trading advice.

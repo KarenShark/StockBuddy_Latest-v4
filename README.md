@@ -4,6 +4,10 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/KarenShark/StockBuddy_Latest-v4)
 
+## Demo video
+
+Full walkthrough (terminal workflow, modes, evaluation framing): **[YouTube — StockBuddy demo](https://www.youtube.com/watch?v=aP9DHNnA0hA)**
+
 ## What makes this different
 
 | Typical “AI trading” demos | StockBuddy |
@@ -20,8 +24,6 @@
 
 1. **Research** — Configure provider/models and depth, then run the full graph. You get analyst reports, debate synthesis, trader plan, risk discussion, and a final **BUY / SELL / HOLD** narrative plus saved files under `results/`.
 2. **Follow-up Q&A** — After a successful run, optional Q&A uses the **same run’s artifacts** as context (suggested questions + free text), so answers stay tied to that analysis.
-
-**Demo (slides walkthrough):** [YouTube](https://youtu.be/aP9DHNnA0hA)
 
 ## Terminal demo (live run — HSBC `0005`, 2024-04-05)
 

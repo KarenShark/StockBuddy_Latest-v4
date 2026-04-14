@@ -1,21 +1,63 @@
+import os
 import chromadb
 from chromadb.config import Settings
 from openai import OpenAI
 
 
+def _memory_disabled(config: dict) -> bool:
+    if config.get("memory_enabled") is False:
+        return True
+    v = os.getenv("STOCKBUDDY_DISABLE_MEMORY", "")
+    return v.lower() in ("1", "true", "yes")
+
+
+def _embedding_api_key_and_headers(config: dict):
+    """Align with trading_graph ChatOpenAI: same key + headers as main LLM."""
+    provider = str(config.get("llm_provider", "")).lower()
+    api_key = os.getenv("OPENAI_API_KEY")
+    extra_headers = {}
+    if provider == "openrouter":
+        api_key = os.getenv("OPENROUTER_API_KEY") or api_key
+        extra_headers = {
+            "HTTP-Referer": "https://github.com/KarenShark/StockBuddy_Latest-v4",
+            "X-Title": "StockBuddy",
+        }
+    return api_key, extra_headers
+
+
 class FinancialSituationMemory:
     def __init__(self, name, config):
-        if config["backend_url"] == "http://localhost:11434/v1":
-            self.embedding = "nomic-embed-text"
-        else:
-            self.embedding = "text-embedding-3-small"
-        self.client = OpenAI(base_url=config["backend_url"])
-        self.chroma_client = chromadb.Client(Settings(allow_reset=True))
-        self.situation_collection = self.chroma_client.create_collection(name=name)
+        self._disabled = _memory_disabled(config)
+        self.client = None
+        self.embedding = config.get("embedding_model") or (
+            "nomic-embed-text"
+            if config.get("backend_url") == "http://localhost:11434/v1"
+            else "text-embedding-3-small"
+        )
+
+        if not self._disabled:
+            api_key, extra_headers = _embedding_api_key_and_headers(config)
+            kwargs = {"base_url": config["backend_url"], "api_key": api_key}
+            if extra_headers:
+                kwargs["default_headers"] = extra_headers
+            self.client = OpenAI(**kwargs)
+
+        # Skip ChromaDB entirely when memory is disabled — avoids parallel-init
+        # race on PersistentClient (RustBindingsAPI concurrency crash).
+        if self._disabled:
+            self.chroma_client = None
+            self.situation_collection = None
+            return
+
+        persist_directory = os.path.join(config["project_dir"], "data", "chromadb")
+        os.makedirs(persist_directory, exist_ok=True)
+        self.chroma_client = chromadb.PersistentClient(path=persist_directory)
+        self.situation_collection = self.chroma_client.get_or_create_collection(name=name)
 
     def get_embedding(self, text):
         """Get OpenAI embedding for a text"""
-        
+        if self._disabled or self.client is None:
+            raise RuntimeError("embedding disabled or client not configured")
         response = self.client.embeddings.create(
             model=self.embedding, input=text
         )
@@ -23,6 +65,8 @@ class FinancialSituationMemory:
 
     def add_situations(self, situations_and_advice):
         """Add financial situations and their corresponding advice. Parameter is a list of tuples (situation, rec)"""
+        if self._disabled:
+            return
 
         situations = []
         advice = []
@@ -46,6 +90,9 @@ class FinancialSituationMemory:
 
     def get_memories(self, current_situation, n_matches=1):
         """Find matching recommendations using OpenAI embeddings"""
+        if self._disabled or self.client is None:
+            return []
+
         query_embedding = self.get_embedding(current_situation)
 
         results = self.situation_collection.query(
@@ -68,8 +115,9 @@ class FinancialSituationMemory:
 
 
 if __name__ == "__main__":
-    # Example usage
-    matcher = FinancialSituationMemory()
+    from stockbuddy.default_config import DEFAULT_CONFIG
+
+    matcher = FinancialSituationMemory("demo", DEFAULT_CONFIG)
 
     # Example data
     example_data = [

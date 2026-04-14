@@ -25,7 +25,7 @@ def create_bear_researcher(llm, memory):
             past_memory_str += rec["recommendation"] + "\n\n"
 
         # 根據市場選擇prompt
-        default_market = os.getenv('DEFAULT_MARKET', 'HK')
+        default_market = os.getenv('DEFAULT_MARKET', 'HKEX')
         if default_market == 'HKEX':
             base_prompt = get_hk_market_prompt('bear')
             prompt = f"""{base_prompt}

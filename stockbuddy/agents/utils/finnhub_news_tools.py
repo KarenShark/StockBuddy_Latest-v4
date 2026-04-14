@@ -16,45 +16,22 @@ from stockbuddy.dataflows.finnhub_news import (
 def get_finnhub_news(
     ticker_symbol: Annotated[str, "港股代码或美股代码，如'0700'、'AAPL'"],
     days_back: Annotated[int, "回溯天数"] = 7,
+    analysis_date: Annotated[str, "分析基准日期 yyyy-mm-dd，不传则用今天"] = "",
 ) -> str:
     """
-    【专业金融新闻】从 Finnhub API 获取公司新闻
-    
-    Finnhub 优势：
-    - ⭐ 专业金融数据API，数据质量高
-    - ⭐ 支持全球股市（包括港股、美股、A股等）
-    - ⭐ 多语言新闻源
-    - ⭐ 实时更新
-    - ⭐ 免费额度充足
-    
-    返回内容：
-    - 新闻标题、摘要、来源
-    - 发布时间（精确到秒）
-    - 新闻链接（可直接访问）
-    - 新闻分类（业绩、监管、并购等）
-    
-    适用场景：
-    - 获取港股公司的专业财经新闻
-    - 补充 Google News 的内容
-    - 需要高质量、权威的新闻源
-    
-    港股使用：
-    - 输入如 '0700'、'9988' 会自动转换为 '0700.HK'、'9988.HK'
-    - 支持 .HK 后缀的标准格式
+    Finnhub company news. Pass analysis_date for back-testing.
     """
-    # 计算日期范围
-    end_date = datetime.now()
+    if analysis_date and analysis_date.strip():
+        end_date = datetime.strptime(analysis_date.strip(), "%Y-%m-%d")
+    else:
+        end_date = datetime.now()
     start_date = end_date - timedelta(days=days_back)
-    end_date_str = end_date.strftime("%Y-%m-%d")
-    start_date_str = start_date.strftime("%Y-%m-%d")
-    
-    # 调用 Finnhub API
+
     result = get_finnhub_company_news(
         ticker_symbol=ticker_symbol,
-        start_date=start_date_str,
-        end_date=end_date_str
+        start_date=start_date.strftime("%Y-%m-%d"),
+        end_date=end_date.strftime("%Y-%m-%d"),
     )
-    
     return result
 
 

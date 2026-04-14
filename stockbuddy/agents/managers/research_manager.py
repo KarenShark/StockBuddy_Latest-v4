@@ -2,13 +2,7 @@ import time
 import json
 import os
 from stockbuddy.default_config import DEFAULT_CONFIG
-
-# 獲取默認市場配置
-default_market = os.getenv('DEFAULT_MARKET', 'HK')
-
-# 導入 HK 市場專用提示詞
-if default_market == 'HKEX':
-    from stockbuddy.agents.utils.hk_market_prompts import get_hk_market_prompt
+from stockbuddy.agents.utils.hk_market_prompts import get_hk_market_prompt
 
 
 def create_research_manager(llm, memory):
@@ -28,6 +22,7 @@ def create_research_manager(llm, memory):
         for i, rec in enumerate(past_memories, 1):
             past_memory_str += rec["recommendation"] + "\n\n"
 
+        default_market = os.getenv('DEFAULT_MARKET', 'HKEX')
         if default_market == 'HKEX':
             base_prompt = get_hk_market_prompt('research_manager')
             prompt = f"""{base_prompt}

@@ -5,6 +5,7 @@ import os
 from stockbuddy.agents.utils.agent_utils import get_stock_data, get_indicators
 from stockbuddy.dataflows.config import get_config
 from stockbuddy.agents.utils.hk_market_prompts import get_hk_market_prompt
+from stockbuddy.dataflows.google import get_company_chinese_name
 
 
 def create_market_analyst(llm):
@@ -12,7 +13,6 @@ def create_market_analyst(llm):
     def market_analyst_node(state):
         current_date = state["trade_date"]
         ticker = state["company_of_interest"]
-        company_name = state["company_of_interest"]
 
         tools = [
             get_stock_data,
@@ -22,24 +22,33 @@ def create_market_analyst(llm):
         # 根據市場選擇prompt
         config = get_config()
         default_market = config.get('DEFAULT_MARKET', 'HK')
+        company_display_name = ""
         if default_market == 'HKEX':
             system_message = get_hk_market_prompt('market')
+            company_display_name = get_company_chinese_name(ticker) or ""
+            if company_display_name and company_display_name.strip() != str(ticker).strip():
+                system_message += (
+                    "\n\n## 系統提供的標的（報告抬頭必須與之一致，禁止臆造公司名）\n"
+                    f"- 代碼：{ticker}\n"
+                    f"- 公司名稱：{company_display_name}\n"
+                )
         else:
             system_message = (
             """You are a trading assistant tasked with analyzing financial markets. Your role is to select the **most relevant indicators** for a given market condition or trading strategy from the following list. The goal is to choose up to **8 indicators** that provide complementary insights without redundancy.
 
 ⚠️ **IMPORTANT: Date Range Calculation (MUST FOLLOW STRICTLY)**
-- The system will provide the current analysis date (current_date), e.g., 2026-01-24
+- The system will provide the current analysis date (current_date)
 - When using get_stock_data:
-  * **end_date MUST be current_date** (e.g., 2026-01-24)
-  * **start_date MUST be current_date minus 30-60 days** (e.g., if current_date is 2026-01-24, then start_date should be 2025-12-25 or 2025-11-25)
+  * **end_date MUST be current_date**
+  * **start_date MUST be current_date minus 30-60 days**
 - **STRICTLY FORBIDDEN**:
-  * ❌ Do NOT use past years (e.g., 2023, 2024)
-  * ❌ Do NOT use fixed dates (e.g., 2023-12-25)
+  * ❌ Do NOT hardcode any specific year or date
   * ❌ MUST dynamically calculate date range based on the current_date provided by the system
-- **Correct Examples**:
-  * ✅ current_date = 2026-01-24 → start_date = 2025-12-25, end_date = 2026-01-24
-  * ✅ current_date = 2026-01-23 → start_date = 2025-12-24, end_date = 2026-01-23
+  * ❌ end_date must NEVER exceed current_date (to avoid future data leakage)
+- **Example** (assuming current_date = 2024-09-02):
+  * ✅ start_date = 2024-08-03, end_date = 2024-09-02
+- When using get_indicators:
+  * **curr_date MUST be set to current_date**
 
 Categories and each category's indicators are:
 
@@ -77,19 +86,27 @@ Volume-Based Indicators:
                     " Use the provided tools to progress towards answering the question."
                     " If you are unable to fully answer, that's OK; another assistant with different tools"
                     " will help where you left off. Execute what you can to make progress."
-                    " If you or any other assistant has the FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** or deliverable,"
-                    " prefix your response with FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** so the team knows to stop."
+                    " If you or any other assistant has the FINAL TRANSACTION PROPOSAL (BUY|OVERWEIGHT|HOLD|UNDERWEIGHT|SELL) or deliverable,"
+                    " prefix your response with that five-way token so the team knows to stop."
                     " You have access to the following tools: {tool_names}.\n{system_message}"
-                    "For your reference, the current date is {current_date}. The company we want to look at is {ticker}",
+                    "For your reference, the current date is {current_date}. "
+                    "The company we want to look at is {ticker}{company_name_suffix}.",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
         )
 
+        name_suffix = (
+            f"（{company_display_name}）"
+            if company_display_name
+            and str(company_display_name).strip() != str(ticker).strip()
+            else ""
+        )
         prompt = prompt.partial(system_message=system_message)
         prompt = prompt.partial(tool_names=", ".join([tool.name for tool in tools]))
         prompt = prompt.partial(current_date=current_date)
         prompt = prompt.partial(ticker=ticker)
+        prompt = prompt.partial(company_name_suffix=name_suffix)
 
         chain = prompt | llm.bind_tools(tools)
 

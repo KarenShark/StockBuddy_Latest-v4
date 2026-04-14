@@ -5,7 +5,7 @@
 
 from langchain_core.tools import tool
 from typing import Annotated
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from stockbuddy.dataflows.newsdata_io import get_newsdata_hk_stock_news, get_newsdata_market_news
 from stockbuddy.dataflows.hkexnews_scraper import get_hkex_announcements
 from stockbuddy.dataflows.google import get_company_chinese_name
@@ -16,42 +16,25 @@ from stockbuddy.dataflows.finnhub_news import get_finnhub_company_news, get_finn
 def get_hk_news_content(
     ticker_symbol: Annotated[str, "港股代码，如'0700'或'9988'"],
     days_back: Annotated[int, "回溯天数"] = 7,
+    analysis_date: Annotated[str, "分析基准日期 yyyy-mm-dd，不传则用今天"] = "",
 ) -> str:
     """
-    【港股专用】获取实际的新闻内容 - 整合多个来源！
-    
-    功能：
-    1. 从 Google News 抓取实际新闻内容（标题+摘要）
-    2. 从披露易(HKEXnews)获取官方公告信息
-    3. 自动识别公司中文名称，提高搜索准确性
-    
-    数据来源：
-    - ✅ Google News: 阿斯达克、信报、经济日报、经济通等
-    - ✅ HKEXnews: 官方公告平台
-    - ✅ 自动中文名称识别
-    
-    返回内容：
-    - 新闻标题、摘要、来源、发布日期
-    - 官方公告链接和说明
-    - 按时间倒序排列
-    
-    优势：
-    - 实际内容，不只是链接
-    - 多来源整合，信息全面
-    - 专为港股优化
+    HK stock news aggregator: Finnhub + Newsdata.io + HKEXnews.
+
+    Pass analysis_date when back-testing to avoid look-ahead bias.
     """
-    # 标准化ticker
     ticker_clean = ticker_symbol.replace('.HK', '').replace('.HKG', '').zfill(4)
     ticker_display = f"{ticker_clean}.HK"
     
-    # 获取公司中文名称（优先使用 API，fallback 到映射表）
     company_name = get_company_chinese_name(ticker_symbol)
-    # 如果返回的是 ticker 本身，说明没找到名称，设为空字符串
     if company_name == ticker_symbol or company_name == ticker_clean:
         company_name = ""
     
-    # 日期范围
-    end_date = datetime.now()
+    # Anchor to analysis_date when provided, else today
+    if analysis_date and analysis_date.strip():
+        end_date = datetime.strptime(analysis_date.strip(), "%Y-%m-%d")
+    else:
+        end_date = datetime.now()
     start_date = end_date - timedelta(days=days_back)
     end_date_str = end_date.strftime("%Y-%m-%d")
     start_date_str = start_date.strftime("%Y-%m-%d")
@@ -84,25 +67,26 @@ def get_hk_news_content(
     
     report += "---\n\n"
     
-    # 2. Newsdata.io 新闻（替代 Google News）
+    # 2. Newsdata.io (live API only — no historical date support on free tier)
     report += "## 二、财经媒体新闻（Newsdata.io API）\n\n"
     
-    try:
-        # 调用 Newsdata.io API
-        newsdata_news = get_newsdata_hk_stock_news(
-            ticker_symbol=ticker_clean,
-            company_name=company_name,
-            days_back=days_back,
-            max_results=10
-        )
-        
-        if newsdata_news:
-            report += newsdata_news + "\n\n"
-        else:
-            report += "⚠️ 未找到相关新闻\n\n"
-            
-    except Exception as e:
-        report += f"⚠️ Newsdata.io 获取失败: {str(e)}\n\n"
+    _is_historical = end_date.date() < datetime.now(timezone.utc).date()
+    if _is_historical:
+        report += "⚠️ Newsdata.io 免费版不支持历史查询，已跳过\n\n"
+    else:
+        try:
+            newsdata_news = get_newsdata_hk_stock_news(
+                ticker_symbol=ticker_clean,
+                company_name=company_name,
+                days_back=days_back,
+                max_results=10,
+            )
+            if newsdata_news:
+                report += newsdata_news + "\n\n"
+            else:
+                report += "⚠️ 未找到相关新闻\n\n"
+        except Exception as e:
+            report += f"⚠️ Newsdata.io 获取失败: {str(e)}\n\n"
     
     report += "---\n\n"
     
@@ -159,53 +143,56 @@ def get_hk_news_content(
 
 @tool  
 def get_hk_market_news_content(
-    days_back: Annotated[int, "回溯天数"] = 3
+    days_back: Annotated[int, "lookback days"] = 3,
+    analysis_date: Annotated[str, "analysis date yyyy-mm-dd; defaults to today"] = "",
 ) -> str:
     """
-    【港股专用】获取港股市场整体新闻实际内容
-    
-    功能：
-    - 抓取恒生指数、国企指数相关新闻
-    - 港股通资金流向新闻
-    - 香港宏观经济新闻
-    - 中国政策对港股影响的新闻
-    
-    返回：实际新闻内容，不只是链接
+    HK market: full-text style headlines/snippets via Newsdata (cn/hk/tw business).
+    Sections are labeled in English; API query stays zh for recall.
+    Pass analysis_date for back-testing to avoid look-ahead bias.
     """
-    end_date = datetime.now()
-    start_date = end_date - timedelta(days=days_back)
-    end_date_str = end_date.strftime("%Y-%m-%d")
+    if analysis_date and analysis_date.strip():
+        from datetime import datetime as _dt
+        try:
+            ad = _dt.strptime(analysis_date.strip(), "%Y-%m-%d").date()
+            if ad < _dt.now().date():
+                return (
+                    f"⚠️ get_hk_market_news_content: analysis_date={analysis_date} is historical. "
+                    "Newsdata.io has no archive — use get_news(ticker, start_date, end_date) instead."
+                )
+        except ValueError:
+            pass
+
+    report = f"# 📊 Hong Kong market news (snippets)\n"
+    report += f"## Window: last {days_back} day(s)\n\n"
     
-    report = f"# 📊 港股市场新闻 - 实际内容\n"
-    report += f"## 时间范围: 近{days_back}天\n\n"
-    
-    # 搜索关键词列表
-    keywords = [
-        "恒生指数",
-        "国企指数",
-        "港股通",
-        "北水南下",
-        "香港股市"
+    # (section label EN, Newsdata q in zh — keeps HK-relevant hits)
+    topics = [
+        ("Hang Seng Index", "恒生指数"),
+        ("HSCEI", "国企指数"),
+        ("Stock Connect", "港股通"),
+        ("Southbound flows", "北水南下"),
+        ("Hong Kong stock market", "香港股市"),
     ]
     
-    for keyword in keywords:
-        report += f"### 🔍 {keyword}\n\n"
+    for label_en, query_zh in topics:
+        report += f"### 🔍 {label_en}\n\n"
         
         try:
-            # 使用 Newsdata.io 搜索市场新闻
             news = get_newsdata_market_news(
-                query=keyword,
+                query=query_zh,
                 days_back=days_back,
-                max_results=5
+                max_results=5,
+                template_lang="en",
             )
             
             if news:
                 report += news + "\n\n"
             else:
-                report += f"⚠️ 未找到关于 {keyword} 的新闻\n\n"
+                report += f"⚠️ No news found for this topic.\n\n"
                 
         except Exception as e:
-            report += f"⚠️ 搜索失败: {str(e)}\n\n"
+            report += f"⚠️ Search failed: {str(e)}\n\n"
         
         report += "---\n\n"
     

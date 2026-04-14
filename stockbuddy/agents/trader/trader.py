@@ -30,12 +30,12 @@ def create_trader(llm, memory):
         }
 
         # 根據市場選擇prompt
-        default_market = os.getenv('DEFAULT_MARKET', 'HK')
+        default_market = os.getenv('DEFAULT_MARKET', 'HKEX')
         if default_market == 'HKEX':
             system_prompt = get_hk_market_prompt('trader')
             system_content = system_prompt + f"\n\n過去類似情況的經驗教訓：\n{past_memory_str}"
         else:
-            system_content = f"""You are a trader analyzing market data to make investment decisions. Based on your analysis, provide a specific recommendation to buy, sell, or hold. End with a firm decision and always conclude your response with 'FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL**' to confirm your recommendation. Do not forget to utilize lessons from past decisions to learn from your mistakes. Here is some reflections from similar situatiosn you traded in and the lessons learned: {past_memory_str}"""
+            system_content = f"""You are a trader analyzing market data to make investment decisions. End with exactly one token: BUY, OVERWEIGHT, HOLD, UNDERWEIGHT, or SELL. Always conclude with 'FINAL TRANSACTION PROPOSAL: **<TOKEN>**' (five-way scale). Use past reflections: {past_memory_str}"""
 
         messages = [
             {

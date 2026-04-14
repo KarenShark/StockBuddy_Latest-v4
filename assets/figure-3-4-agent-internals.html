@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Figure 3.4 Agent Internals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Serif:ital,wght@0,400;0,600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; color: #18181b; -webkit-font-smoothing: antialiased; }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 40px 48px 48px; }
+    svg { display: block; width: 100%; height: auto; font-family: "IBM Plex Sans", system-ui, sans-serif; }
+    .cap {
+      margin-top: 20px;
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 10.5pt;
+      line-height: 1.5;
+      color: #3f3f46;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <svg viewBox="0 0 1180 520" xmlns="http://www.w3.org/2000/svg" aria-label="Agent internals diagram">
+      <defs>
+        <marker id="ar" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#27272a"/></marker>
+        <marker id="arB" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#3f3f46"/></marker>
+      </defs>
+
+      <!-- Column guides (hairline, non-decorative) -->
+      <line x1="392" y1="56" x2="392" y2="464" stroke="#e4e4e7" stroke-width="1"/>
+      <line x1="736" y1="56" x2="736" y2="464" stroke="#e4e4e7" stroke-width="1"/>
+
+      <text x="196" y="44" text-anchor="middle" font-size="8" font-weight="600" letter-spacing="0.14em" fill="#71717a">SINGLE AGENT CELL</text>
+      <text x="564" y="44" text-anchor="middle" font-size="8" font-weight="600" letter-spacing="0.14em" fill="#71717a">FRAMEWORK SPLIT</text>
+      <text x="958" y="44" text-anchor="middle" font-size="8" font-weight="600" letter-spacing="0.14em" fill="#71717a">STAGE-TO-STAGE FLOW</text>
+
+      <!-- LEFT: single agent -->
+      <rect x="32" y="60" width="328" height="396" rx="4" fill="#fafafa" stroke="#d4d4d8" stroke-width="1"/>
+      <rect x="56" y="76" width="208" height="52" rx="4" fill="#fff" stroke="#27272a" stroke-width="1.15"/>
+      <text x="160" y="98" text-anchor="middle" font-weight="600" font-size="10">Role-specific prompt</text>
+      <text x="160" y="114" text-anchor="middle" font-size="7.5" fill="#71717a">system + task instructions</text>
+      <text x="272" y="102" font-size="7" fill="#52525b" font-style="italic">task-specific</text>
+
+      <rect x="56" y="152" width="112" height="76" rx="4" fill="#fff" stroke="#1e3a8a" stroke-width="1.6"/>
+      <text x="112" y="180" text-anchor="middle" font-weight="700" font-size="10" fill="#1e3a8a">LLM brain</text>
+      <text x="112" y="198" text-anchor="middle" font-size="7.5" fill="#52525b">frontier model</text>
+      <text x="112" y="214" text-anchor="middle" font-size="7" fill="#71717a">API-based</text>
+
+      <rect x="192" y="160" width="100" height="60" rx="4" fill="#fff" stroke="#27272a" stroke-width="1.15"/>
+      <text x="242" y="184" text-anchor="middle" font-weight="600" font-size="9.5">Tool layer</text>
+      <text x="242" y="200" text-anchor="middle" font-size="7" fill="#71717a">grounding</text>
+      <text x="300" y="188" font-size="7" fill="#52525b" font-style="italic">tool grounding</text>
+
+      <rect x="56" y="268" width="236" height="64" rx="4" fill="#fff" stroke="#27272a" stroke-width="1.15"/>
+      <text x="174" y="292" text-anchor="middle" font-weight="600" font-size="10">Structured output</text>
+      <text x="174" y="310" text-anchor="middle" font-size="7.5" fill="#71717a">parser / validator → typed record</text>
+      <text x="300" y="300" font-size="7" fill="#52525b" font-style="italic">evidence-based</text>
+
+      <g fill="none" stroke="#27272a" stroke-width="1.05">
+        <path d="M 160 128 L 160 140 L 112 140 L 112 152" marker-end="url(#ar)"/>
+        <line x1="168" y1="190" x2="190" y2="190" marker-end="url(#arB)"/>
+        <line x1="190" y1="198" x2="168" y2="198" marker-end="url(#arB)"/>
+        <path d="M 112 228 L 112 248 L 174 248 L 174 268" marker-end="url(#ar)"/>
+      </g>
+      <text x="178" y="186" font-size="6.5" fill="#64748b">call</text>
+      <text x="178" y="206" font-size="6.5" fill="#64748b">obs</text>
+
+      <!-- LEFT footnote -->
+      <text x="196" y="452" text-anchor="middle" font-size="7.5" fill="#71717a">One cell template per stage; prompts/tools vary by role.</text>
+
+      <!-- CENTER: LangGraph / LangChain -->
+      <rect x="408" y="60" width="312" height="188" rx="4" fill="#fff" stroke="#1e3a8a" stroke-width="1.5"/>
+      <text x="564" y="86" text-anchor="middle" font-weight="700" font-size="10.5" fill="#1e3a8a">LangGraph</text>
+      <text x="564" y="104" text-anchor="middle" font-size="8" fill="#52525b">orchestration &amp; workflow graph</text>
+      <line x1="424" y1="112" x2="704" y2="112" stroke="#bfdbfe" stroke-width="1"/>
+      <text x="424" y="132" font-size="8.5" fill="#3f3f46">• Directed <tspan font-weight="600">state graph</tspan> (nodes = stages)</text>
+      <text x="424" y="150" font-size="8.5" fill="#3f3f46">• Conditional <tspan font-weight="600">stage transitions</tspan></text>
+      <text x="424" y="168" font-size="8.5" fill="#3f3f46">• <tspan font-weight="600">Handoff</tspan> of shared state across agents</text>
+      <text x="424" y="186" font-size="8.5" fill="#3f3f46">• Single execution trace per run ID</text>
+      <text x="424" y="210" font-size="7.5" fill="#71717a" font-style="italic">Not used for low-level tool syntax</text>
+
+      <rect x="408" y="268" width="312" height="188" rx="4" fill="#fafafa" stroke="#27272a" stroke-width="1.15"/>
+      <text x="564" y="294" text-anchor="middle" font-weight="700" font-size="10.5">LangChain ecosystem</text>
+      <text x="564" y="312" text-anchor="middle" font-size="8" fill="#52525b">models, prompts, tools, messages</text>
+      <line x1="424" y1="320" x2="704" y2="320" stroke="#e4e4e7" stroke-width="1"/>
+      <text x="424" y="340" font-size="8.5" fill="#3f3f46">• Chat <tspan font-weight="600">model wrappers</tspan> &amp; provider config</text>
+      <text x="424" y="358" font-size="8.5" fill="#3f3f46">• <tspan font-weight="600">Prompt templates</tspan> &amp; message assembly</text>
+      <text x="424" y="376" font-size="8.5" fill="#3f3f46">• <tspan font-weight="600">Tool</tspan> registration &amp; invocation surface</text>
+      <text x="424" y="394" font-size="8.5" fill="#3f3f46">• Typed <tspan font-weight="600">message</tspan> objects in context windows</text>
+      <text x="424" y="418" font-size="7.5" fill="#71717a" font-style="italic">Composes the “cells” on the left</text>
+
+      <rect x="408" y="252" width="312" height="14" rx="2" fill="#fff" stroke="#d4d4d8" stroke-width="1"/>
+      <text x="564" y="262" text-anchor="middle" font-size="7" font-weight="600" fill="#52525b" letter-spacing="0.06em">SEPARATION OF CONCERNS</text>
+
+      <!-- Bridge arrows center ↔ sides -->
+      <g fill="none" stroke="#52525b" stroke-width="1" stroke-dasharray="3 2">
+        <line x1="360" y1="220" x2="406" y2="154"/>
+        <line x1="360" y1="320" x2="406" y2="320"/>
+      </g>
+      <text x="378" y="210" font-size="6.5" fill="#71717a">scheduled</text>
+      <text x="378" y="312" font-size="6.5" fill="#71717a">implements</text>
+
+      <g fill="none" stroke="#52525b" stroke-width="1" stroke-dasharray="3 2">
+        <line x1="720" y1="154" x2="752" y2="154"/>
+        <line x1="720" y1="320" x2="752" y2="320"/>
+      </g>
+
+      <!-- RIGHT: stages -->
+      <rect x="752" y="60" width="396" height="396" rx="4" fill="#fafafa" stroke="#d4d4d8" stroke-width="1"/>
+
+      <rect x="776" y="76" width="160" height="52" rx="4" fill="#fff" stroke="#27272a" stroke-width="1.15"/>
+      <text x="856" y="98" text-anchor="middle" font-weight="600" font-size="9.5">Analyst agent(s)</text>
+      <text x="856" y="114" text-anchor="middle" font-size="7.5" fill="#71717a">domain reports</text>
+
+      <rect x="952" y="84" width="176" height="36" rx="3" fill="#fff" stroke="#a1a1aa" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="1040" y="100" text-anchor="middle" font-size="7.5" font-weight="500" fill="#52525b">Intermediate artifact</text>
+      <text x="1040" y="112" text-anchor="middle" font-size="6.5" fill="#a1a1aa">structured partials</text>
+
+      <line x1="936" y1="102" x2="948" y2="102" stroke="#27272a" marker-end="url(#ar)"/>
+
+      <rect x="776" y="156" width="160" height="52" rx="4" fill="#fff" stroke="#27272a" stroke-width="1.15"/>
+      <text x="856" y="178" text-anchor="middle" font-weight="600" font-size="9.5">Debate / aggregation</text>
+      <text x="856" y="194" text-anchor="middle" font-size="7.5" fill="#71717a">reconciled positions</text>
+
+      <rect x="952" y="164" width="176" height="36" rx="3" fill="#fff" stroke="#a1a1aa" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="1040" y="180" text-anchor="middle" font-size="7.5" font-weight="500" fill="#52525b">Consensus record</text>
+      <text x="1040" y="192" text-anchor="middle" font-size="6.5" fill="#a1a1aa">explicit disagreement log</text>
+
+      <line x1="936" y1="182" x2="948" y2="182" stroke="#27272a" marker-end="url(#ar)"/>
+
+      <rect x="776" y="236" width="160" height="52" rx="4" fill="#fff" stroke="#27272a" stroke-width="1.15"/>
+      <text x="856" y="258" text-anchor="middle" font-weight="600" font-size="9.5">Trader / risk review</text>
+      <text x="856" y="274" text-anchor="middle" font-size="7.5" fill="#71717a">action + gate pass</text>
+
+      <rect x="952" y="244" width="176" height="36" rx="3" fill="#fff" stroke="#a1a1aa" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="1040" y="260" text-anchor="middle" font-size="7.5" font-weight="500" fill="#52525b">Risk-adjusted proposal</text>
+      <text x="1040" y="272" text-anchor="middle" font-size="6.5" fill="#a1a1aa">policy metadata</text>
+
+      <line x1="936" y1="262" x2="948" y2="262" stroke="#27272a" marker-end="url(#ar)"/>
+
+      <rect x="776" y="316" width="352" height="56" rx="4" fill="#f4f4f5" stroke="#27272a" stroke-width="1.2"/>
+      <text x="952" y="340" text-anchor="middle" font-weight="700" font-size="10">Manager / final recommendation</text>
+      <text x="952" y="358" text-anchor="middle" font-size="7.5" fill="#52525b">terminal narrative + exportable structured bundle</text>
+
+      <!-- Vertical spine -->
+      <g fill="none" stroke="#27272a" stroke-width="1.1">
+        <line x1="856" y1="128" x2="856" y2="156" marker-end="url(#ar)"/>
+        <line x1="856" y1="208" x2="856" y2="236" marker-end="url(#ar)"/>
+        <line x1="856" y1="288" x2="856" y2="316" marker-end="url(#ar)"/>
+      </g>
+
+      <text x="952" y="396" text-anchor="middle" font-size="7.5" fill="#71717a" font-style="italic">Sequential handoffs; no broadcast mesh between stages.</text>
+      <text x="952" y="412" text-anchor="middle" font-size="7.5" fill="#71717a">Each box consumes prior artifacts + shared graph state.</text>
+
+      <!-- Horizontal link LangGraph to pipeline -->
+      <line x1="704" y1="120" x2="752" y2="102" stroke="#1e3a8a" stroke-width="1" marker-end="url(#ar)"/>
+      <text x="724" y="98" font-size="6.5" fill="#1e3a8a">drives</text>
+    </svg>
+
+    <p class="cap">Figure 3.4 — Agent internals: model, prompts, tools, state transitions, and stage-to-stage communication.</p>
+  </div>
+</body>
+</html>

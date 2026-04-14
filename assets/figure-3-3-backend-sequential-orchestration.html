@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Figure 3.3 Backend Sequential Multi-Agent Orchestration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Serif:ital,wght@0,400;0,600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; color: #18181b; -webkit-font-smoothing: antialiased; }
+    .sheet { max-width: 1180px; margin: 0 auto; padding: 52px 68px 60px; }
+    h1 {
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 11pt;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-align: center;
+      margin: 0 0 40px;
+      color: #09090b;
+    }
+    svg { display: block; width: 100%; height: auto; font-family: "IBM Plex Sans", system-ui, sans-serif; }
+    .caption {
+      margin-top: 26px;
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 10.5pt;
+      line-height: 1.55;
+      color: #3f3f46;
+      text-align: justify;
+      text-align-last: center;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .caption em { font-style: italic; color: #52525b; }
+    .md-ref { margin-top: 18px; font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 9pt; color: #71717a; text-align: center; }
+    .md-ref a { color: #52525b; }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>Figure 3.3 &nbsp; Backend Sequential Multi-Agent Orchestration</h1>
+    <svg viewBox="0 0 1080 430" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="a" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#27272a"/></marker>
+      </defs>
+      <text x="540" y="26" text-anchor="middle" font-size="8.5" font-weight="600" letter-spacing="0.18em" fill="#71717a">SEQUENTIAL CONTROL FLOW (NOT PARALLEL FLAT POOL)</text>
+      <rect x="40" y="44" width="1000" height="52" rx="3" fill="#fafafa" stroke="#e4e4e7" stroke-width="1"/>
+      <text x="540" y="70" text-anchor="middle" font-size="9" fill="#52525b">Each stage completes before the next is scheduled — one LangGraph path, state forwarded in order.</text>
+      <text x="540" y="88" text-anchor="middle" font-size="8" fill="#a1a1aa">Edges are hand-offs along the primary path, not concurrent peer messaging.</text>
+
+      <!-- Gray dashed grouping only (no fill tint); text has explicit fill (parent g uses fill=none for rects) -->
+      <g stroke="#b4b4bc" stroke-width="1.2" stroke-dasharray="5 4" fill="none">
+        <rect x="42" y="118" width="188" height="188" rx="6"/>
+        <rect x="238" y="118" width="372" height="188" rx="6"/>
+        <rect x="618" y="118" width="188" height="188" rx="6"/>
+        <rect x="814" y="118" width="224" height="188" rx="6"/>
+      </g>
+      <g font-size="7.5" font-weight="600" fill="#71717a">
+        <text x="136" y="112" text-anchor="middle" letter-spacing="0.12em">INFORMATION COLLECTION</text>
+        <text x="424" y="112" text-anchor="middle" letter-spacing="0.1em">REASONING &amp; DEBATE</text>
+        <text x="712" y="112" text-anchor="middle" letter-spacing="0.1em">RISK GOVERNANCE</text>
+        <text x="926" y="112" text-anchor="middle" letter-spacing="0.1em">OUTPUT SYNTHESIS</text>
+      </g>
+
+      <g font-size="10" fill="#18181b">
+        <rect x="52" y="136" width="168" height="168" rx="6" fill="#fff" stroke="#27272a" stroke-width="1.2"/>
+        <text x="136" y="162" text-anchor="middle" font-weight="700" font-size="11">Analyst layer</text>
+        <line x1="64" y1="170" x2="208" y2="170" stroke="#e4e4e7"/>
+        <text x="136" y="188" text-anchor="middle" font-size="8.5" fill="#52525b">Parallel tool use</text>
+        <text x="136" y="204" text-anchor="middle" font-size="8.5" fill="#52525b">within stage only</text>
+        <text x="136" y="226" text-anchor="middle" font-size="8" fill="#71717a">Retrieves &amp; drafts</text>
+        <text x="136" y="242" text-anchor="middle" font-size="8" fill="#71717a">domain reports</text>
+        <text x="136" y="268" text-anchor="middle" font-size="7.5" fill="#a1a1aa" font-style="italic">feeds next layer</text>
+
+        <rect x="252" y="136" width="168" height="168" rx="6" fill="#fff" stroke="#27272a" stroke-width="1.2"/>
+        <text x="336" y="162" text-anchor="middle" font-weight="700" font-size="11">Debate / aggregation</text>
+        <line x1="264" y1="170" x2="408" y2="170" stroke="#e4e4e7"/>
+        <text x="336" y="188" text-anchor="middle" font-size="8.5" fill="#52525b">Bull / bear; research mgr</text>
+        <text x="336" y="204" text-anchor="middle" font-size="8.5" fill="#52525b">consolidates positions</text>
+        <text x="336" y="226" text-anchor="middle" font-size="8" fill="#71717a">Compresses evidence</text>
+        <text x="336" y="242" text-anchor="middle" font-size="8" fill="#71717a">into comparable views</text>
+
+        <rect x="452" y="136" width="168" height="168" rx="6" fill="#fff" stroke="#27272a" stroke-width="1.2"/>
+        <text x="536" y="162" text-anchor="middle" font-weight="700" font-size="11">Decision / trader</text>
+        <line x1="464" y1="170" x2="608" y2="170" stroke="#e4e4e7"/>
+        <text x="536" y="188" text-anchor="middle" font-size="8.5" fill="#52525b">Investment plan &amp;</text>
+        <text x="536" y="204" text-anchor="middle" font-size="8.5" fill="#52525b">five-level stance</text>
+        <text x="536" y="226" text-anchor="middle" font-size="8" fill="#71717a">Maps debate to</text>
+        <text x="536" y="242" text-anchor="middle" font-size="8" fill="#71717a">action-oriented signal</text>
+
+        <rect x="652" y="136" width="168" height="168" rx="6" fill="#fff" stroke="#27272a" stroke-width="1.2"/>
+        <text x="736" y="162" text-anchor="middle" font-weight="700" font-size="11">Risk / review</text>
+        <line x1="664" y1="170" x2="808" y2="170" stroke="#e4e4e7"/>
+        <text x="736" y="188" text-anchor="middle" font-size="8.5" fill="#52525b">Multi-perspective</text>
+        <text x="736" y="204" text-anchor="middle" font-size="8.5" fill="#52525b">analysts + judge</text>
+        <text x="736" y="226" text-anchor="middle" font-size="8" fill="#71717a">May refine narrative</text>
+        <text x="736" y="242" text-anchor="middle" font-size="8" fill="#71717a">before final token</text>
+
+        <rect x="852" y="136" width="184" height="168" rx="6" fill="#fafafa" stroke="#27272a" stroke-width="1.2"/>
+        <text x="944" y="162" text-anchor="middle" font-weight="700" font-size="11">Final synthesis</text>
+        <text x="944" y="178" text-anchor="middle" font-weight="700" font-size="11">/ output</text>
+        <line x1="866" y1="186" x2="1022" y2="186" stroke="#e4e4e7"/>
+        <text x="944" y="204" text-anchor="middle" font-size="8.5" fill="#52525b">Narrative + structured</text>
+        <text x="944" y="220" text-anchor="middle" font-size="8.5" fill="#52525b">artifacts for UI / logs</text>
+        <text x="944" y="242" text-anchor="middle" font-size="8" fill="#71717a">Terminal-facing bundle</text>
+      </g>
+
+      <g fill="none" stroke="#27272a" stroke-width="1.1">
+        <line x1="220" y1="220" x2="244" y2="220" marker-end="url(#a)"/>
+        <line x1="420" y1="220" x2="444" y2="220" marker-end="url(#a)"/>
+        <line x1="620" y1="220" x2="644" y2="220" marker-end="url(#a)"/>
+        <line x1="820" y1="220" x2="844" y2="220" marker-end="url(#a)"/>
+      </g>
+
+      <rect x="120" y="330" width="840" height="64" rx="4" fill="#fff" stroke="#d4d4d8" stroke-width="1"/>
+      <text x="540" y="354" text-anchor="middle" font-size="8.5" fill="#3f3f46" font-style="italic">LangGraph-based orchestration; LangChain for models, prompts, and tools.</text>
+      <text x="540" y="376" text-anchor="middle" font-size="8" fill="#71717a">Gray dashed outlines group logical phases; solid boxes are graph stages.</text>
+    </svg>
+    <p class="caption">
+      <em>Backend sequential multi-agent orchestration.</em> Processing proceeds in ordered stages: heterogeneous analysts feed debate and aggregation,
+      then a trader-style decision module, risk review, and final synthesis. The topology is sequential on the main path, reducing unstructured parallel chatter.
+      The same structure appears as a line-drawing diagram in <code>figure-3-3-backend-sequential-orchestration.md</code>.
+    </p>
+    <p class="md-ref">ASCII version: <a href="figure-3-3-backend-sequential-orchestration.md">figure-3-3-backend-sequential-orchestration.md</a></p>
+  </div>
+</body>
+</html>

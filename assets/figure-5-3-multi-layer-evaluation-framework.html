@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Figure 5.3 Multi-Layer Evaluation Framework</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Serif:ital,wght@0,400;0,600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; -webkit-font-smoothing: antialiased; }
+    .sheet { max-width: 1000px; margin: 0 auto; padding: 52px 56px 60px; }
+    h1 {
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 11pt;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-align: center;
+      margin: 0 0 32px;
+      color: #09090b;
+    }
+    svg { display: block; width: 100%; height: auto; font-family: "IBM Plex Sans", system-ui, sans-serif; }
+    .caption {
+      margin-top: 24px;
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 10.5pt;
+      line-height: 1.55;
+      color: #3f3f46;
+      text-align: justify;
+      text-align-last: center;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .caption em { font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>Figure 5.3 &nbsp; Multi-Layer Evaluation Framework</h1>
+    <svg viewBox="0 0 880 540" xmlns="http://www.w3.org/2000/svg">
+      <rect x="40" y="36" width="800" height="44" rx="3" fill="#fafafa" stroke="#e4e4e7" stroke-width="1"/>
+      <text x="440" y="58" text-anchor="middle" font-size="8.5" font-weight="600" fill="#52525b" letter-spacing="0.08em">LAYERED EVALUATION — NOT RETURN-ONLY</text>
+      <text x="440" y="74" text-anchor="middle" font-size="8" fill="#71717a">Ascend from operational validity to distributional behavior, governance, then economic outcomes.</text>
+
+      <!-- Pyramid apex → base (downstream at top per user layer list order visual: narrow outcome tip) -->
+      <polygon points="320,88 560,88 600,156 280,156" fill="#f4f4f5" stroke="#27272a" stroke-width="1.2"/>
+      <text x="440" y="114" text-anchor="middle" font-weight="700" font-size="10.5" fill="#1e3a8a">Downstream Backtest</text>
+      <text x="440" y="132" text-anchor="middle" font-size="7.5" fill="#52525b">return · Sharpe (where defined) · max drawdown · turnover</text>
+      <text x="440" y="148" text-anchor="middle" font-size="7" fill="#a1a1aa" font-style="italic">Economic summary — contingent on lower layers</text>
+
+      <polygon points="280,160 600,160 640,236 240,236" fill="#fff" stroke="#27272a" stroke-width="1.2"/>
+      <text x="440" y="188" text-anchor="middle" font-weight="700" font-size="10.5">Risk / Governance</text>
+      <text x="440" y="206" text-anchor="middle" font-size="7.5" fill="#52525b">gate triggers (G1–G4) · BUY→HOLD conversion · risk-flag density</text>
+      <text x="440" y="222" text-anchor="middle" font-size="7" fill="#71717a">Governance envelope of the orchestrated graph</text>
+
+      <polygon points="240,240 640,240 680,318 200,318" fill="#fafafa" stroke="#27272a" stroke-width="1.2"/>
+      <text x="440" y="272" text-anchor="middle" font-weight="700" font-size="10.5">Behavior / Decision</text>
+      <text x="440" y="290" text-anchor="middle" font-size="7.5" fill="#52525b">BUY / SELL / HOLD distribution · ignored signals · trade counts</text>
+      <text x="440" y="306" text-anchor="middle" font-size="7" fill="#71717a">Action grammar prior to P&amp;L attribution</text>
+
+      <polygon points="200,322 680,322 720,408 160,408" fill="#fff" stroke="#27272a" stroke-width="1.2"/>
+      <text x="440" y="356" text-anchor="middle" font-weight="700" font-size="10.5">Process / Reliability</text>
+      <text x="440" y="374" text-anchor="middle" font-size="7.5" fill="#52525b">run completeness · parse-failure rate · artifact / lineage coverage</text>
+      <text x="440" y="390" text-anchor="middle" font-size="7" fill="#71717a">Foundational: faithful execution of the declared protocol</text>
+
+      <!-- Side bracket -->
+      <path d="M 800 100 L 820 100 L 820 420 L 800 420" fill="none" stroke="#d4d4d8" stroke-width="1"/>
+      <text x="836" y="268" font-size="8" fill="#71717a" transform="rotate(90 836 268)">increasing abstraction ↑</text>
+
+      <text x="440" y="468" text-anchor="middle" font-size="8.5" fill="#3f3f46" font-style="italic">Synthesis weights all tiers; suppressing lower layers invites false precision on headline metrics.</text>
+    </svg>
+    <p class="caption">
+      <em>Multi-layer evaluation framework.</em> Decision quality under uncertainty is decomposed into process reliability, behavioral signatures, risk governance, and only then downstream backtest statistics.
+      This ordering discourages <em>return-only</em> reporting when upstream validity is unknown.
+    </p>
+  </div>
+</body>
+</html>

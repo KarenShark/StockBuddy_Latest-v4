@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Figure 5.1 Why Evaluation Is Difficult</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Serif:ital,wght@0,400;0,600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; -webkit-font-smoothing: antialiased; }
+    .sheet { max-width: 1000px; margin: 0 auto; padding: 52px 56px 60px; }
+    h1 {
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 10.5pt;
+      font-weight: 600;
+      letter-spacing: 0.025em;
+      text-align: center;
+      margin: 0 0 32px;
+      color: #09090b;
+      line-height: 1.35;
+    }
+    svg { display: block; width: 100%; height: auto; font-family: "IBM Plex Sans", system-ui, sans-serif; }
+    .caption {
+      margin-top: 24px;
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 10.5pt;
+      line-height: 1.55;
+      color: #3f3f46;
+      text-align: justify;
+      text-align-last: center;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .caption em { font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>Figure 5.1 &nbsp; Why Evaluation Is Difficult for Rich Multi-Agent Outputs</h1>
+    <svg viewBox="0 0 920 480" xmlns="http://www.w3.org/2000/svg">
+      <rect x="36" y="40" width="848" height="46" rx="3" fill="#fafafa" stroke="#e4e4e7" stroke-width="1"/>
+      <text x="460" y="62" text-anchor="middle" font-size="8.5" font-weight="600" fill="#52525b">FOUR INTERACTING CHALLENGES (CONCEPTUAL)</text>
+      <text x="460" y="78" text-anchor="middle" font-size="8" fill="#71717a">Arrows indicate reinforcing tensions, not a strict causal chain.</text>
+
+      <!-- Quadrants -->
+      <line x1="460" y1="100" x2="460" y2="400" stroke="#d4d4d8" stroke-width="1"/>
+      <line x1="60" y1="250" x2="860" y2="250" stroke="#d4d4d8" stroke-width="1"/>
+
+      <!-- Q1 top-left -->
+      <rect x="72" y="112" width="368" height="124" rx="5" fill="#fff" stroke="#27272a" stroke-width="1.15"/>
+      <text x="256" y="138" text-anchor="middle" font-weight="700" font-size="10" fill="#1e3a8a">Rich outputs ↔ quantification gap</text>
+      <text x="88" y="160" font-size="8.5" fill="#3f3f46">Long-form reports and debate traces are</text>
+      <text x="88" y="176" font-size="8.5" fill="#3f3f46">highly informative for humans yet resist</text>
+      <text x="88" y="192" font-size="8.5" fill="#3f3f46">automatic scoring without lossy adapters.</text>
+      <text x="88" y="216" font-size="8" fill="#71717a" font-style="italic">Semantic bandwidth ↑  ⇒  metric stability ↓</text>
+
+      <!-- Q2 top-right -->
+      <rect x="480" y="112" width="368" height="124" rx="5" fill="#fff" stroke="#27272a" stroke-width="1.15"/>
+      <text x="664" y="138" text-anchor="middle" font-weight="700" font-size="10" fill="#1e3a8a">Benchmark immaturity</text>
+      <text x="496" y="160" font-size="8.5" fill="#3f3f46">No widely accepted leaderboard for</text>
+      <text x="496" y="176" font-size="8.5" fill="#3f3f46">multi-agent financial copilots; public</text>
+      <text x="496" y="192" font-size="8.5" fill="#3f3f46">tasks rarely mirror proprietary pipelines.</text>
+      <text x="496" y="216" font-size="8" fill="#71717a" font-style="italic">External validity remains negotiated</text>
+
+      <!-- Q3 bottom-left -->
+      <rect x="72" y="264" width="368" height="124" rx="5" fill="#fafafa" stroke="#27272a" stroke-width="1.15"/>
+      <text x="256" y="290" text-anchor="middle" font-weight="700" font-size="10">Return-only evaluation insufficient</text>
+      <text x="88" y="312" font-size="8.5" fill="#3f3f46">P&amp;L-centric tests omit governance,</text>
+      <text x="88" y="328" font-size="8.5" fill="#3f3f46">behavioral anomalies, and process faults</text>
+      <text x="88" y="344" font-size="8.5" fill="#3f3f46">that precede any trade simulation.</text>
+      <text x="88" y="368" font-size="8" fill="#71717a" font-style="italic">Good backtests can mask bad mechanics</text>
+
+      <!-- Q4 bottom-right -->
+      <rect x="480" y="264" width="368" height="124" rx="5" fill="#fafafa" stroke="#27272a" stroke-width="1.15"/>
+      <text x="664" y="290" text-anchor="middle" font-weight="700" font-size="10">Protocol design shapes conclusions</text>
+      <text x="496" y="312" font-size="8.5" fill="#3f3f46">Holding periods, fee snapshots, news</text>
+      <text x="496" y="328" font-size="8.5" fill="#3f3f46">ablation, and universe choice co-determine</text>
+      <text x="496" y="344" font-size="8.5" fill="#3f3f46">which system variant appears “superior.”</text>
+      <text x="496" y="368" font-size="8" fill="#71717a" font-style="italic">The evaluator is part of the result</text>
+
+      <circle cx="460" cy="250" r="5" fill="#fff" stroke="#64748b" stroke-width="1.2"/>
+      <text x="460" y="268" text-anchor="middle" font-size="7" fill="#64748b" font-style="italic">mutual constraints</text>
+      <g fill="none" stroke="#cbd5e1" stroke-width="1">
+        <line x1="440" y1="188" x2="454" y2="238"/>
+        <line x1="480" y1="188" x2="466" y2="238"/>
+        <line x1="256" y1="236" x2="448" y2="244"/>
+        <line x1="664" y1="236" x2="472" y2="244"/>
+        <line x1="256" y1="264" x2="448" y2="256"/>
+        <line x1="664" y1="264" x2="472" y2="256"/>
+      </g>
+    </svg>
+    <p class="caption">
+      <em>Why evaluation is difficult.</em> Rich multi-agent systems couple semantic richness with immature benchmarks, while headline backtests alone under-specify quality.
+      Protocol choices further entangle conclusions, motivating the layered framework in Figure 5.3 and explicit adaptation bridges (Figure 3.6).
+    </p>
+  </div>
+</body>
+</html>

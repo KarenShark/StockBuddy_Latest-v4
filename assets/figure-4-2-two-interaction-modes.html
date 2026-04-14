@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Figure 4.2 Two Interaction Modes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Serif:ital,wght@0,400;0,600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; -webkit-font-smoothing: antialiased; }
+    .sheet { max-width: 1180px; margin: 0 auto; padding: 52px 64px 60px; }
+    h1 {
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 11pt;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-align: center;
+      margin: 0 0 36px;
+      color: #09090b;
+    }
+    svg { display: block; width: 100%; height: auto; font-family: "IBM Plex Sans", system-ui, sans-serif; }
+    .caption {
+      margin-top: 26px;
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 10.5pt;
+      line-height: 1.55;
+      color: #3f3f46;
+      text-align: justify;
+      text-align-last: center;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .caption em { font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>Figure 4.2 &nbsp; Two Interaction Modes</h1>
+    <svg viewBox="0 0 1120 520" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="p" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#27272a"/></marker>
+      </defs>
+      <rect x="28" y="36" width="1064" height="48" rx="3" fill="#fafafa" stroke="#e4e4e7" stroke-width="1"/>
+      <text x="560" y="58" text-anchor="middle" font-size="8.5" font-weight="600" fill="#52525b">Both modes are <tspan fill="#1e3a8a">artifact-grounded</tspan> — not a generic stateless chatbot.</text>
+      <text x="560" y="74" text-anchor="middle" font-size="8" fill="#71717a">Context = generated reports, decisions, and structured records from the same run.</text>
+
+      <!-- Mode 1 panel -->
+      <rect x="36" y="96" width="520" height="396" rx="6" fill="#fff" stroke="#27272a" stroke-width="1.25"/>
+      <text x="296" y="128" text-anchor="middle" font-weight="700" font-size="11" fill="#18181b">Mode 1 — Research</text>
+      <text x="296" y="146" text-anchor="middle" font-size="8" fill="#71717a" letter-spacing="0.12em">PRIMARY BATCH TRAJECTORY</text>
+      <line x1="56" y1="156" x2="536" y2="156" stroke="#e4e4e7"/>
+
+      <rect x="76" y="176" width="120" height="44" rx="4" fill="#fafafa" stroke="#d4d4d8"/>
+      <text x="136" y="202" text-anchor="middle" font-size="9" font-weight="600">User</text>
+      <line x1="196" y1="198" x2="248" y2="198" stroke="#27272a" marker-end="url(#p)"/>
+      <text x="220" y="192" text-anchor="middle" font-size="7" fill="#64748b">launch</text>
+      <rect x="248" y="176" width="160" height="44" rx="4" fill="#fff" stroke="#27272a" stroke-width="1.15"/>
+      <text x="328" y="202" text-anchor="middle" font-size="9" font-weight="600">Task spec</text>
+      <line x1="408" y1="198" x2="468" y2="198" stroke="#27272a" marker-end="url(#p)"/>
+      <rect x="468" y="168" width="88" height="60" rx="4" fill="#fafafa" stroke="#1e3a8a" stroke-width="1.4"/>
+      <text x="512" y="192" text-anchor="middle" font-size="8.5" font-weight="600" fill="#1e3a8a">Pipeline</text>
+      <text x="512" y="208" text-anchor="middle" font-size="7" fill="#52525b">full graph</text>
+
+      <line x1="512" y1="228" x2="512" y2="252" stroke="#27272a" marker-end="url(#p)"/>
+
+      <rect x="96" y="252" width="400" height="112" rx="5" fill="#fafafa" stroke="#e4e4e7"/>
+      <text x="296" y="278" text-anchor="middle" font-weight="600" font-size="10">Emitted artifacts</text>
+      <text x="112" y="300" font-size="8.5" fill="#3f3f46">• Sectioned <tspan font-weight="600">reports</tspan> (analyst outputs)</text>
+      <text x="112" y="318" font-size="8.5" fill="#3f3f46">• <tspan font-weight="600">Final trade decision</tspan> narrative</text>
+      <text x="112" y="336" font-size="8.5" fill="#3f3f46">• Logs, lineage, optional <tspan font-weight="600">structured</tspan> bundles</text>
+      <text x="112" y="354" font-size="8" fill="#71717a" font-style="italic">All grounded in this run’s state — fixed as corpus for Mode 2</text>
+
+      <path d="M 296 364 L 296 388" stroke="#27272a" marker-end="url(#p)"/>
+      <rect x="176" y="388" width="240" height="44" rx="4" fill="#fff" stroke="#27272a"/>
+      <text x="296" y="414" text-anchor="middle" font-size="9" font-weight="600">User reviews in terminal</text>
+      <text x="296" y="472" text-anchor="middle" font-size="8" fill="#71717a">End state: frozen artifact set + optional follow-up entry point</text>
+
+      <!-- Mode 2 panel -->
+      <rect x="564" y="96" width="520" height="396" rx="6" fill="#fff" stroke="#27272a" stroke-width="1.25"/>
+      <text x="824" y="128" text-anchor="middle" font-weight="700" font-size="11" fill="#18181b">Mode 2 — Follow-up Q&amp;A</text>
+      <text x="824" y="146" text-anchor="middle" font-size="8" fill="#71717a" letter-spacing="0.1em">ARTIFACT-CONDITIONED DIALOGUE</text>
+      <line x1="584" y1="156" x2="1064" y2="156" stroke="#e4e4e7"/>
+
+      <rect x="596" y="176" width="200" height="72" rx="5" fill="#fafafa" stroke="#1e3a8a" stroke-width="1.3"/>
+      <text x="696" y="200" text-anchor="middle" font-weight="600" font-size="9" fill="#1e3a8a">Grounding corpus</text>
+      <text x="696" y="218" text-anchor="middle" font-size="7.5" fill="#52525b">reports · decision text · JSON slices</text>
+      <text x="696" y="234" text-anchor="middle" font-size="7" fill="#71717a">retrieved in-session, not the open web</text>
+
+      <line x1="696" y1="248" x2="696" y2="272" stroke="#27272a" marker-end="url(#p)"/>
+
+      <rect x="604" y="272" width="184" height="40" rx="4" fill="#fff" stroke="#d4d4d8"/>
+      <text x="696" y="296" text-anchor="middle" font-size="8.5" font-weight="600">Suggested questions</text>
+      <text x="820" y="296" text-anchor="middle" font-size="8" fill="#a1a1aa">or</text>
+      <rect x="756" y="272" width="300" height="40" rx="4" fill="#fff" stroke="#d4d4d8"/>
+      <text x="906" y="296" text-anchor="middle" font-size="8.5" font-weight="600">Free-form user input</text>
+
+      <line x1="696" y1="312" x2="696" y2="332" stroke="#27272a"/>
+      <line x1="906" y1="312" x2="906" y2="332" stroke="#27272a"/>
+      <line x1="696" y1="332" x2="906" y2="332" stroke="#27272a"/>
+      <line x1="800" y1="332" x2="800" y2="348" stroke="#27272a" marker-end="url(#p)"/>
+
+      <rect x="648" y="348" width="304" height="56" rx="5" fill="#fafafa" stroke="#27272a" stroke-width="1.15"/>
+      <text x="800" y="372" text-anchor="middle" font-weight="600" font-size="9.5">Response generator</text>
+      <text x="800" y="390" text-anchor="middle" font-size="8" fill="#52525b">Answers constrained / cited against artifacts above</text>
+
+      <line x1="800" y1="404" x2="800" y2="424" stroke="#27272a" marker-end="url(#p)"/>
+      <rect x="720" y="424" width="160" height="40" rx="4" fill="#fff" stroke="#27272a"/>
+      <text x="800" y="448" text-anchor="middle" font-size="9" font-weight="600">User</text>
+      <text x="800" y="484" text-anchor="middle" font-size="8" fill="#71717a">Loop: further probes stay tied to the same artifact bundle</text>
+    </svg>
+    <p class="caption">
+      <em>Two interaction modes.</em> <em>Research</em> mode runs the full pipeline and materializes a bounded artifact set.
+      <em>Follow-up Q&amp;A</em> mode conditions dialogue on those artifacts—via suggested prompts or user text—so the system does not degenerate into unconstrained generic chat.
+    </p>
+  </div>
+</body>
+</html>

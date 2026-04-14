@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Figure 8.1 Scientific Contribution Pyramid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Serif:ital,wght@0,400;0,600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fff; -webkit-font-smoothing: antialiased; }
+    .sheet { max-width: 920px; margin: 0 auto; padding: 52px 56px 60px; }
+    h1 {
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 11pt;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-align: center;
+      margin: 0 0 32px;
+      color: #09090b;
+    }
+    svg { display: block; width: 100%; height: auto; font-family: "IBM Plex Sans", system-ui, sans-serif; }
+    .caption {
+      margin-top: 24px;
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 10.5pt;
+      line-height: 1.55;
+      color: #3f3f46;
+      text-align: justify;
+      text-align-last: center;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .caption em { font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>Figure 8.1 &nbsp; Scientific Contribution Pyramid</h1>
+    <svg viewBox="0 0 840 560" xmlns="http://www.w3.org/2000/svg">
+      <rect x="32" y="32" width="776" height="42" rx="3" fill="#fafafa" stroke="#e4e4e7" stroke-width="1"/>
+      <text x="420" y="52" text-anchor="middle" font-size="8.5" font-weight="600" fill="#52525b" letter-spacing="0.1em">CONTRIBUTION STACK (FOUNDATION → CAPSTONE)</text>
+      <text x="420" y="68" text-anchor="middle" font-size="8" fill="#71717a">Bottom layers contextualize; upper layers generalize the evaluation argument.</text>
+
+      <!-- Apex: multi-layer evaluation -->
+      <polygon points="300,88 540,88 575,148 265,148" fill="#f4f4f5" stroke="#27272a" stroke-width="1.2"/>
+      <text x="420" y="112" text-anchor="middle" font-weight="700" font-size="9.8" fill="#1e3a8a">Multi-layer evaluation methodology</text>
+      <text x="420" y="128" text-anchor="middle" font-size="7.5" fill="#52525b">for decision quality under uncertainty</text>
+      <text x="420" y="142" text-anchor="middle" font-size="7" fill="#71717a">Process → behavior → risk → backtest</text>
+
+      <polygon points="265,152 575,152 615,228 225,228" fill="#fff" stroke="#27272a" stroke-width="1.2"/>
+      <text x="420" y="178" text-anchor="middle" font-weight="700" font-size="9.8">Adaptation bridge from rich outputs</text>
+      <text x="420" y="194" text-anchor="middle" font-weight="700" font-size="9.8">to quantifiable evaluation</text>
+      <text x="420" y="212" text-anchor="middle" font-size="7.5" fill="#52525b">Structured artifacts (e.g. decision records) without discarding prose</text>
+
+      <polygon points="225,232 615,232 660,314 180,314" fill="#fafafa" stroke="#27272a" stroke-width="1.2"/>
+      <text x="420" y="262" text-anchor="middle" font-weight="700" font-size="9.8">Sequential multi-agent orchestration</text>
+      <text x="420" y="278" text-anchor="middle" font-size="7.5" fill="#52525b">for structured reasoning (debate → decision → risk → synthesis)</text>
+      <text x="420" y="294" text-anchor="middle" font-size="7" fill="#71717a">Graph-scheduled, not an unstructured agent swarm</text>
+
+      <polygon points="180,318 660,318 710,418 130,418" fill="#fff" stroke="#27272a" stroke-width="1.2"/>
+      <text x="420" y="352" text-anchor="middle" font-weight="700" font-size="9.8">Hong Kong–oriented decision-support framing</text>
+      <text x="420" y="370" text-anchor="middle" font-size="7.5" fill="#52525b">Tickers, calendar, fees, and data idiosyncrasies typical of HKEX context</text>
+      <text x="420" y="386" text-anchor="middle" font-size="7" fill="#71717a">Grounds the system in a concrete retail / FYP-relevant market setting</text>
+
+      <text x="420" y="448" text-anchor="middle" font-size="8.5" fill="#3f3f46" font-style="italic">Narrow apex: methodological claim; broad base: domain situating the work.</text>
+    </svg>
+    <p class="caption">
+      <em>Scientific contribution pyramid.</em> Contributions are stacked from a Hong Kong–specific decision-support setting through orchestrated multi-agent reasoning and an adaptation bridge,
+      culminating in a layered evaluation methodology that treats decision quality as more than a single scalar return.
+    </p>
+  </div>
+</body>
+</html>

@@ -86,9 +86,31 @@ class StockBuddyGraph:
         )
 
         # Initialize LLMs
-        if self.config["llm_provider"].lower() == "openai" or self.config["llm_provider"] == "ollama" or self.config["llm_provider"] == "openrouter":
-            self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
-            self.quick_thinking_llm = ChatOpenAI(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
+        llm_provider = self.config["llm_provider"].lower()
+        if llm_provider in ["openai", "ollama", "openrouter"]:
+            api_key = os.getenv("OPENAI_API_KEY")
+            extra_headers = {}
+            if llm_provider == "openrouter":
+                api_key = os.getenv("OPENROUTER_API_KEY")
+                extra_headers = {
+                    "HTTP-Referer": "https://github.com/KarenShark/StockBuddy_Latest-v4",
+                    "X-Title": "StockBuddy"
+                }
+            
+            self.deep_thinking_llm = ChatOpenAI(
+                model=self.config["deep_think_llm"], 
+                base_url=self.config["backend_url"],
+                api_key=api_key,
+                default_headers=extra_headers,
+                temperature=0,
+            )
+            self.quick_thinking_llm = ChatOpenAI(
+                model=self.config["quick_think_llm"], 
+                base_url=self.config["backend_url"],
+                api_key=api_key,
+                default_headers=extra_headers,
+                temperature=0,
+            )
         elif self.config["llm_provider"].lower() == "anthropic":
             self.deep_thinking_llm = ChatAnthropic(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
             self.quick_thinking_llm = ChatAnthropic(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
@@ -109,7 +131,10 @@ class StockBuddyGraph:
         self.tool_nodes = self._create_tool_nodes()
 
         # Initialize components
-        self.conditional_logic = ConditionalLogic()
+        self.conditional_logic = ConditionalLogic(
+            max_debate_rounds=self.config.get("max_debate_rounds", 1),
+            max_risk_discuss_rounds=self.config.get("max_risk_discuss_rounds", 1)
+        )
         self.graph_setup = GraphSetup(
             self.quick_thinking_llm,
             self.deep_thinking_llm,
@@ -131,8 +156,12 @@ class StockBuddyGraph:
         self.ticker = None
         self.log_states_dict = {}  # date to full state dict
 
-        # Set up the graph
-        self.graph = self.graph_setup.setup_graph(selected_analysts)
+        # Set up the graph (single-agent = market tools only, no debate/risk subgraph)
+        self.single_agent = self.config.get("pipeline_profile") == "single_agent"
+        if self.single_agent:
+            self.graph = self.graph_setup.setup_single_market_graph()
+        else:
+            self.graph = self.graph_setup.setup_graph(selected_analysts)
 
     def _create_tool_nodes(self) -> Dict[str, ToolNode]:
         """Create tool nodes for different data sources using abstract methods."""
@@ -179,8 +208,12 @@ class StockBuddyGraph:
             ),
         }
 
-    def propagate(self, company_name, trade_date):
-        """Run the StockBuddy graph for a company on a specific date."""
+    def propagate(self, company_name, trade_date, stream_callback=None):
+        """Run the StockBuddy graph for a company on a specific date.
+
+        stream_callback(node_name: str, partial_state: dict) is called after
+        each graph node completes; used by the research console for live UI.
+        """
 
         self.ticker = company_name
 
@@ -190,7 +223,17 @@ class StockBuddyGraph:
         )
         args = self.propagator.get_graph_args()
 
-        if self.debug:
+        if stream_callback:
+            # Stream mode: emit node-level progress, accumulate into final_state.
+            accumulated: dict = {}
+            for event in self.graph.stream(init_agent_state, stream_mode="updates", **args):
+                for node_name, updates in event.items():
+                    if isinstance(updates, dict):
+                        accumulated.update(updates)
+                    stream_callback(node_name, dict(accumulated))
+            # Ensure we have the authoritative final state via invoke.
+            final_state = self.graph.invoke(init_agent_state, **args)
+        elif self.debug:
             # Debug mode with tracing
             trace = []
             for chunk in self.graph.stream(init_agent_state, **args):
@@ -205,6 +248,10 @@ class StockBuddyGraph:
             # Standard mode without tracing
             final_state = self.graph.invoke(init_agent_state, **args)
 
+        if self.single_agent:
+            final_state = dict(final_state)
+            final_state["final_trade_decision"] = final_state.get("market_report") or ""
+
         # Store current state for reflection
         self.curr_state = final_state
 
@@ -216,34 +263,36 @@ class StockBuddyGraph:
 
     def _log_state(self, trade_date, final_state):
         """Log the final state to a JSON file."""
+        inv = final_state.get("investment_debate_state") or {}
+        rsk = final_state.get("risk_debate_state") or {}
+        if not isinstance(inv, dict):
+            inv = getattr(inv, "__dict__", {}) or {}
+        if not isinstance(rsk, dict):
+            rsk = getattr(rsk, "__dict__", {}) or {}
         self.log_states_dict[str(trade_date)] = {
-            "company_of_interest": final_state["company_of_interest"],
-            "trade_date": final_state["trade_date"],
-            "market_report": final_state["market_report"],
-            "sentiment_report": final_state["sentiment_report"],
-            "news_report": final_state["news_report"],
-            "fundamentals_report": final_state["fundamentals_report"],
+            "company_of_interest": final_state.get("company_of_interest", ""),
+            "trade_date": final_state.get("trade_date", ""),
+            "market_report": final_state.get("market_report", ""),
+            "sentiment_report": final_state.get("sentiment_report", ""),
+            "news_report": final_state.get("news_report", ""),
+            "fundamentals_report": final_state.get("fundamentals_report", ""),
             "investment_debate_state": {
-                "bull_history": final_state["investment_debate_state"]["bull_history"],
-                "bear_history": final_state["investment_debate_state"]["bear_history"],
-                "history": final_state["investment_debate_state"]["history"],
-                "current_response": final_state["investment_debate_state"][
-                    "current_response"
-                ],
-                "judge_decision": final_state["investment_debate_state"][
-                    "judge_decision"
-                ],
+                "bull_history": inv.get("bull_history", ""),
+                "bear_history": inv.get("bear_history", ""),
+                "history": inv.get("history", ""),
+                "current_response": inv.get("current_response", ""),
+                "judge_decision": inv.get("judge_decision", ""),
             },
-            "trader_investment_decision": final_state["trader_investment_plan"],
+            "trader_investment_decision": final_state.get("trader_investment_plan", ""),
             "risk_debate_state": {
-                "risky_history": final_state["risk_debate_state"]["risky_history"],
-                "safe_history": final_state["risk_debate_state"]["safe_history"],
-                "neutral_history": final_state["risk_debate_state"]["neutral_history"],
-                "history": final_state["risk_debate_state"]["history"],
-                "judge_decision": final_state["risk_debate_state"]["judge_decision"],
+                "risky_history": rsk.get("risky_history", ""),
+                "safe_history": rsk.get("safe_history", ""),
+                "neutral_history": rsk.get("neutral_history", ""),
+                "history": rsk.get("history", ""),
+                "judge_decision": rsk.get("judge_decision", ""),
             },
-            "investment_plan": final_state["investment_plan"],
-            "final_trade_decision": final_state["final_trade_decision"],
+            "investment_plan": final_state.get("investment_plan", ""),
+            "final_trade_decision": final_state.get("final_trade_decision", ""),
         }
 
         # Save to file

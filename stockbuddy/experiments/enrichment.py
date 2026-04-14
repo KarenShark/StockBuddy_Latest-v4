@@ -99,7 +99,7 @@ def enrich_decision_fields(
 - risk_flags: array of short snake_case strings (e.g. liquidity, macro, data_gap), can be empty
 - no_trade_reason: null or short string if the memo implies no clear trade / stay flat
 
-Stance must be one of: BUY, OVERWEIGHT, HOLD, UNDERWEIGHT, SELL (TradingAgents-style five levels).
+Stance must be one of: BUY, OVERWEIGHT, HOLD, UNDERWEIGHT, SELL (five-level ordinal scale).
 Extracted action from signal line (may be wrong): {parsed_action!r}
 Signal processor output: {signal_str!r}
 

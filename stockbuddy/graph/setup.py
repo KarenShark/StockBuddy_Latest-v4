@@ -200,3 +200,22 @@ class GraphSetup:
 
         # Compile and return
         return workflow.compile()
+
+    def setup_single_market_graph(self):
+        """Market analyst + tools only; END after last tool loop (no debate/risk)."""
+        workflow = StateGraph(AgentState)
+        market_node = create_market_analyst(self.quick_thinking_llm)
+        delete_market = create_msg_delete()
+        tools_market = self.tool_nodes["market"]
+        workflow.add_node("Market Analyst", market_node)
+        workflow.add_node("Msg Clear Market", delete_market)
+        workflow.add_node("tools_market", tools_market)
+        workflow.add_edge(START, "Market Analyst")
+        workflow.add_conditional_edges(
+            "Market Analyst",
+            self.conditional_logic.should_continue_market,
+            ["tools_market", "Msg Clear Market"],
+        )
+        workflow.add_edge("tools_market", "Market Analyst")
+        workflow.add_edge("Msg Clear Market", END)
+        return workflow.compile()

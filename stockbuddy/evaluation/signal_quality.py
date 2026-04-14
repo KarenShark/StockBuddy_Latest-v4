@@ -34,7 +34,7 @@ from stockbuddy.evaluation.prices import (
 )
 
 # ── direction mapping ────────────────────────────────────────────
-# Ordinal -2..+2 for five-way actions (TradingAgents-style); Spearman IC uses this scale.
+# Ordinal -2..+2 for five-way actions; Spearman IC uses this scale.
 
 ACTION_DIRECTION = {
     "SELL": -2,

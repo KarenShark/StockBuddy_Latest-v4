@@ -2,6 +2,8 @@
 
 from langchain_openai import ChatOpenAI
 
+from stockbuddy.graph.signal_vocab import coerce_llm_action_token
+
 
 class SignalProcessor:
     """Processes trading signals to extract actionable decisions."""
@@ -12,20 +14,19 @@ class SignalProcessor:
 
     def process_signal(self, full_signal: str) -> str:
         """
-        Process a full trading signal to extract the core decision.
-
-        Args:
-            full_signal: Complete trading signal text
-
-        Returns:
-            Extracted decision (BUY, SELL, or HOLD)
+        Map final_trade_decision text to one of five canonical actions (BUY/OVERWEIGHT/HOLD/UNDERWEIGHT/SELL).
         """
         messages = [
             (
                 "system",
-                "You are an efficient assistant designed to analyze paragraphs or financial reports provided by a group of analysts. Your task is to extract the investment decision: SELL, BUY, or HOLD. Provide only the extracted decision (SELL, BUY, or HOLD) as your output, without adding any additional text or information.",
+                "Extract the single investment stance. Reply with exactly ONE token from this closed set, uppercase, no punctuation, no explanation:\n"
+                "BUY | OVERWEIGHT | HOLD | UNDERWEIGHT | SELL\n"
+                "BUY = strong long / add materially; OVERWEIGHT = modestly bullish / tilt long; "
+                "HOLD = neutral / no change; UNDERWEIGHT = modestly bearish / trim; "
+                "SELL = strong short / exit. If the text is only weakly directional, prefer OVERWEIGHT or UNDERWEIGHT over BUY/SELL.",
             ),
             ("human", full_signal),
         ]
-
-        return self.quick_thinking_llm.invoke(messages).content
+        raw = self.quick_thinking_llm.invoke(messages).content
+        return coerce_llm_action_token(str(raw or ""), full_signal)
+ 

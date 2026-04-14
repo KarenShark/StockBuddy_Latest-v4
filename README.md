@@ -1,79 +1,59 @@
-# StockBuddy
+# StockBuddy: An Explainable Multi-Agent LLM Decision-Support System for Hong Kong Equities
 
-**Explainable multi-agent decision support for Hong Kong equities** — sequential orchestration, tool-grounded reports, and a terminal-first workflow (not a heavy dashboard or a generic chat shell).
+Sequential LangGraph orchestration (specialized analysts → debate → trader → risk layer), **terminal-first** runs, tool-grounded Markdown artifacts, and a **four-layer evaluation protocol** (L0–L3) with HK fee-aware backtests. **Research and education only** — not autonomous live trading; **not** a claim of universal return dominance over buy-and-hold.
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/KarenShark/StockBuddy_Latest-v4)
 
-## Demo video
+## Why this exists
 
-Full walkthrough (terminal workflow, modes, evaluation framing): **[YouTube — StockBuddy demo](https://www.youtube.com/watch?v=aP9DHNnA0hA)**
+Hong Kong’s cash market is active and retail participation is material, but individual investors face **information overload**, **behavioral bias**, **friction costs**, and a lack of **affordable, explainable** analytics. General LLMs lower the entry bar yet lack **grounded, controllable** workflows; many multi-agent finance demos emphasize **returns only** and weak **market-specific adaptation** or **evaluation rigor**. StockBuddy targets **traceable reasoning**, **HK-oriented data paths** (e.g. merged news, HK prompts), and a **multi-layer evaluation protocol** (reliability → signals → backtest → ablations) described in the project report—**governable decision support**, not a claim of consistent outperformance versus buy-and-hold.
 
-## What makes this different
+## What you get (vs. typical “AI trading” chat)
 
-| Typical “AI trading” demos | StockBuddy |
-|----------------------------|------------|
-| Opaque chat or single-model calls | **Layered pipeline**: analysts → bull/bear debate & research manager → trader → risk stances → portfolio gate |
-| Return-only storytelling | **Structured artifacts** (Markdown reports + machine-readable signals) suited to audit and formal evaluation |
-| Web/mobile-first UX | **Terminal-first**: lower overhead, visible progress (Rich live layout), aligned with research workflow |
-| Free-form Q&A | **Follow-up mode grounded on the run’s outputs** — not a standalone financial chatbot |
+| Typical demos | StockBuddy |
+|---------------|------------|
+| Opaque chat / single model | **Layered pipeline**: analysts → bull/bear & research manager → trader → risk stances → portfolio gate |
+| Return-only stories | **Structured artifacts** (reports + machine-readable signals) for audit and formal evaluation |
+| Web/mobile-first | **Terminal-first** (Rich live layout), lower overhead, progress visible |
+| Generic Q&A | **Follow-up mode** grounded on **the same run’s artifacts** |
 
 **In scope:** single-stock research, mixed HK/US tickers (e.g. `0700` → `0700.HK`), optional HTTP API under `api/`.  
 **Out of scope:** autonomous live trading, broker integration, full portfolio optimization, production mobile app.
 
-## How you use it (two modes)
+## Architecture (at a glance)
 
-1. **Research** — Configure provider/models and depth, then run the full graph. You get analyst reports, debate synthesis, trader plan, risk discussion, and a final **BUY / SELL / HOLD** narrative plus saved files under `results/`.
-2. **Follow-up Q&A** — After a successful run, optional Q&A uses the **same run’s artifacts** as context (suggested questions + free text), so answers stay tied to that analysis.
+- **Orchestration:** LangGraph — sequential stages with tool nodes where needed; state carries analyst reports through debate and risk layers (`stockbuddy/graph/`).
+- **Roles:** specialized analysts (market / news / social / fundamentals) → bull/bear debate → research manager → trader → risky/neutral/safe discussion → risk manager; outputs include a **five-level** stance vocabulary and risk governance (see `signal_processing` / `signal_vocab`).
+- **HK adaptation:** merged news routing, window policy, and HK-specific prompts (`stockbuddy/dataflows/`, `hk_market_prompts.py`, etc.).
+- **Evaluation:** **L0–L3** layers (run reliability, signal diagnostics, fee-aware backtests, ablations) plus an **adaptation bridge** from rich text to compact, protocol-friendly signals — code under `stockbuddy/evaluation/` and `stockbuddy/experiments/`.
 
-## Terminal demo (live run — HSBC `0005`, 2024-04-05)
+## Two modes
 
-1. **Hub + ticker resolve + date** — ASCII welcome (“Terminal hub”), ticker `0005` resolved to HSBC / HKG, then analysis date (`YYYY-MM-DD`).
+1. **Research** — Configure provider, depth, and team; run the full graph; get reports and a final stance narrative under `results/`.
+2. **Follow-up Q&A** — After a successful run, ask questions with **the same run’s artifacts** as context (suggested prompts + free text), not a standalone financial chatbot.
 
-![Hub, ticker lookup, date](assets/demo-01-hub-ticker-date.png)
+## Demo video
 
-2. **Guided setup** — Pick analyst team (market / social / news / fundamentals), research depth (e.g. Shallow), then LLM provider (OpenAI, Anthropic, Google, OpenRouter, Ollama).
+Full walkthrough (terminal flow, modes, evaluation framing): **[YouTube — StockBuddy demo](https://www.youtube.com/watch?v=aP9DHNnA0hA)**
 
-![Analysts, depth, provider](assets/demo-02-analysts-depth-provider.png)
+## Terminal flow (screenshots)
 
-3. **Live board (in progress)** — Left: agent status by team; top-right: reasoning stream; bottom: current report chunk; footer: tool / LLM call counts.
+| Step | What you see |
+|------|----------------|
+| Hub, ticker resolve, date | ![Hub](assets/demo-01-hub-ticker-date.png) |
+| Analysts, depth, provider | ![Setup](assets/demo-02-analysts-depth-provider.png) |
+| Live board (in progress) | ![Board](assets/demo-03-live-board-in-progress.png) |
+| Portfolio line + follow-up entry | ![Decision](assets/demo-04-portfolio-decision-complete.png) |
+| Risk + suggested follow-ups | ![Risk](assets/demo-05-risk-decision-followup-menu.png) |
+| Grounded Q&A | ![Q&A](assets/demo-06-followup-qa-grounded.png) |
 
-![Live board mid-run](assets/demo-03-live-board-in-progress.png)
+## Written artifacts (example layout)
 
-4. **Pipeline complete + portfolio narrative** — All agents `completed`; full portfolio-style decision text; session stats; entry into **follow-up Q&A** (English, grounded in this run).
-
-![Portfolio decision and follow-up entry](assets/demo-04-portfolio-decision-complete.png)
-
-5. **Risk-layer report + suggested questions** — Structured risk decision (e.g. accumulate slowly, levels, caveats); menu of **suggested follow-up** prompts tied to the run.
-
-![Risk report and follow-up menu](assets/demo-05-risk-decision-followup-menu.png)
-
-6. **Artifact-grounded Q&A** — Answers cite generated reports (`investment_plan.md`, `fundamentals_report.md`, etc.); custom English questions; honest bounds when a topic is not in the bundle.
-
-![Follow-up Q&A with citations](assets/demo-06-followup-qa-grounded.png)
-
-## Written artifacts (excerpts — `results/0005/2026-04-05/`)
-
-Markdown reports and a tool trace from the same HSBC run; language follows your run settings (here: Traditional Chinese reports).
-
-1. **`final_trade_decision.md`** — Risk-management decision: bull / conservative / neutral synthesis, action (e.g. accumulate slowly), price band, stop, target, holding horizon, risk warnings, conclusion.
-
-![final_trade_decision.md excerpt](assets/artifact-01-final-trade-decision.png)
-
-2. **`fundamentals_report.md`** — Multi-year statements (balance sheet, cash flow, P&L), indicator table, integrated commentary and risk flags.
-
-![fundamentals_report.md excerpt](assets/artifact-02-fundamentals-report.png)
-
-3. **`market_report.md`** — Technicals (SMA/EMA, MACD, RSI, Bollinger), HK market context, recommendation line, summary table, **FINAL TRANSACTION PROPOSAL**.
-
-![market_report.md excerpt](assets/artifact-03-market-report.png)
-
-4. **`message_tool.log`** — Audit-style trace: tool calls (`get_stock_data`, `get_indicators`, news/fundamental tools), planning text, and multi-agent debate snippets (research manager vs risk stances) leading into the final stance.
-
-![message_tool.log excerpt](assets/artifact-04-message-tool-log.png)
+Under `results/<ticker>/<date>/` (e.g. reports, logs): `market_report.md`, `news_report.md`, `fundamentals_report.md`, `sentiment_report.md`, `investment_plan.md`, `trader_investment_plan.md`, `final_trade_decision.md`, plus traces such as `message_tool.log`. Language follows your run settings.
 
 ## Quick start
 
-**Requirements:** Python 3.10+, LLM API key(s) per provider (OpenAI, Anthropic, Google, OpenRouter, or local Ollama).
+**Requirements:** Python 3.10+; LLM API key(s) for your provider (OpenAI, Anthropic, Google, OpenRouter, or local Ollama).
 
 ```bash
 cd "StockBuddy v4"
@@ -84,7 +64,7 @@ pip install -e .
 cp .env.example .env   # fill keys; never commit .env
 ```
 
-**Run (interactive CLI + live board):**
+**Interactive CLI + live board:**
 
 ```bash
 bash start_cli.sh
@@ -92,7 +72,7 @@ bash start_cli.sh
 python -m cli.main
 ```
 
-**Run (script-style):**
+**Script-style:**
 
 ```bash
 python main.py --ticker 0700 --date 2026-01-24
@@ -108,19 +88,161 @@ g = StockBuddyGraph(debug=True, config=DEFAULT_CONFIG.copy())
 final_state, decision = g.propagate("0700", "2026-01-24")
 ```
 
-## Outputs
+Vendors and models live in `stockbuddy/default_config.py` and `.env` (see `.env.example`).
 
-Under `results/<ticker>/<date>/reports/` (when written): e.g. `market_report.md`, `news_report.md`, `fundamentals_report.md`, `sentiment_report.md`, `investment_plan.md`, `trader_investment_plan.md`, `final_trade_decision.md`.
+## Evaluation
 
-Vendors and models are configured in `stockbuddy/default_config.py` and `.env` (see `.env.example`).
+**Code:** `stockbuddy/evaluation/` (timelines, HK fee schedules, backtest helpers, signal utilities) · `stockbuddy/experiments/` (Phase I/II drivers, ablations). Figures below are taken from the **FYP final report** asset set (same as slides). *Not financial advice; protocol-bound academic results.*
 
-## Evaluation (research artifact)
+### 1. Framework & metrics
 
-Formal comparison uses a **fixed historical protocol** and an **adaptation layer** from rich outputs to compact signals (e.g. `decision.json`); evaluation stresses process, behavior, and risk governance — not return alone. Implementation lives under `stockbuddy/evaluation/` and `stockbuddy/experiments/`.
+**Adaptation bridge:** long-form outputs (reports, debates, risk text) → compact stance records so **L1–L3** scores are reproducible.
 
-## Selected references
+![Adaptation bridge](assets/eval-adaptation-bridge.png)
 
-- [TradingAgents](https://github.com/TauricResearch/TradingAgents) · [AgenticTrading](https://github.com/Open-Finance-Lab/AgenticTrading) · [LangGraph](https://docs.langchain.com/langgraph) · [yfinance](https://github.com/ranaroussi/yfinance)
+**Four layers (sequential):** **L0** is a gate for any downstream claim; **L1–L3** build on it.
+
+| Layer | Question | Metrics (examples) |
+|-------|----------|-------------------|
+| **L0** | Reliability & traceability | run success, artifact completeness, parse/lineage, risk-gate activity |
+| **L1** | Signal quality | five-way stance distribution, Spearman IC, hit rates, long–short spread |
+| **L2** | Fee-aware paths | total return, Sharpe, **max drawdown**, Calmar vs **Buy & Hold** & **MACD** |
+| **L3** | Ablations | stance mix by variant; **active-signal ratio** (non-HOLD share) |
+
+**System & orchestration (report figures):**
+
+| | |
+|--|--|
+| ![System overview](assets/eval-system-overview.png) | ![Sequential multi-agent orchestration](assets/eval-multi-agent-orchestration.png) |
+
+**HK data / fee-aware evaluation path (report Figure 8 style):**
+
+![HK market adaptation flow](assets/eval-hk-adaptation-flow.png)
+
+### 2. How experiments are run
+
+**Phase I — cross-sector feasibility (emphasis on L0)**
+
+| Item | Setting |
+|------|---------|
+| Universe | **10** HK tickers, **8** sectors |
+| Window | Mar 2024 – Aug 2024 |
+| Cadence | monthly (first trading day) |
+| Scope | primarily **L0** reliability |
+
+**Phase II — signal quality, backtest, ablations (L1–L3)**
+
+| Item | Setting |
+|------|---------|
+| Tickers | **9988.HK**, **1211.HK**, **0700.HK**, **0005.HK** |
+| Window | Sep 2024 – Feb 2025 |
+| Cadence | weekly (**26** decision dates) |
+| **Full system** | four analysts + debate / risk rounds per report |
+| Engine | Backtrader + **HK fee model** (stamp duty, levies, fees — see report) |
+| Baselines | Buy & Hold, MACD(12,26,9) |
+
+### 3. Results (numerical)
+
+#### L0 — Phase I reliability
+
+| Metric | Value |
+|--------|------:|
+| Successful runs | **30 / 30 (100%)** |
+| Decision parse failures | **0** |
+| Artifact / lineage integrity | **100%** |
+
+Risk gates (reported subset): **5 / 27** runs with gate activity (**18.5%**); **5× BUY → HOLD** downgrades when gates fire (G2/G3 mix — see report).
+
+#### L1 — Phase II stance distribution (104 signals, four tickers)
+
+| Stance | Count | Share |
+|--------|------:|------:|
+| OVERWEIGHT | 54 | 51.9% |
+| UNDERWEIGHT | 46 | 44.2% |
+| BUY | 2 | 1.9% |
+| HOLD | 2 | 1.9% |
+| SELL | 0 | 0.0% |
+
+![Signal distribution (104 signals)](assets/eval-signal-distribution-104.jpg)
+
+Spearman rank IC vs forward returns — **not statistically significant** at listed horizons in the report (bootstrap 95% CI):
+
+![Spearman IC with 95% bootstrap CI](assets/eval-spearman-ic-95ci.jpg)
+
+#### L2 — Backtest vs baselines (**multi_agent** = StockBuddy full pipeline in table)
+
+| Ticker | Strategy | Total return (%) | Sharpe | Max DD (%) | Calmar |
+|--------|----------|-----------------:|-------:|-----------:|-------:|
+| 9988 | **multi_agent** | **+56.42** | **5.07** | **13.39** | **11.07** |
+| 9988 | Buy & Hold | +72.89 | 3.87 | 31.08 | 6.57 |
+| 9988 | MACD | +30.89 | 2.23 | 22.30 | 3.05 |
+| 1211 | **multi_agent** | **+11.90** | **1.41** | **12.58** | **1.89** |
+| 1211 | Buy & Hold | +19.47 | 1.22 | 19.75 | 2.17 |
+| 1211 | MACD | +5.26 | 0.75 | 19.75 | 0.47 |
+| 0700 | **multi_agent** | **+22.86** | **1.94** | **14.98** | **3.98** |
+| 0700 | Buy & Hold | +36.82 | 2.09 | 22.79 | 4.55 |
+| 0700 | MACD | +26.86 | 1.72 | 21.64 | 3.31 |
+| 0005 | **multi_agent** | **+13.93** | **3.22** | **3.65** | **14.11** |
+| 0005 | Buy & Hold | +14.18 | 2.78 | 4.22 | 12.59 |
+| 0005 | MACD | +10.56 | 2.12 | 4.22 | 9.38 |
+
+**Max drawdown vs Buy & Hold (multi-agent highlighted)**
+
+| Ticker | **multi_agent MDD** | B&H MDD | Δ vs B&H |
+|--------|--------------------:|--------:|---------:|
+| 9988 | **13.39%** | 31.08% | **−56.9%** |
+| 1211 | **12.58%** | 19.75% | **−36.3%** |
+| 0700 | **14.98%** | 22.79% | **−34.3%** |
+| 0005 | **3.65%** | 4.22% | **−13.5%** |
+| **Mean** | **11.15%** | **19.46%** | **−35.2%** |
+
+![Maximum drawdown comparison across strategies](assets/eval-mdd-by-strategy.jpg)
+
+*Total return vs B&H is mixed; the report emphasizes **drawdown control** and **risk-adjusted** metrics rather than raw alpha.*
+
+#### L3 — Ablations (9988.HK, 26 weeks)
+
+| Variant | OW | UW | HOLD | BUY | SELL | **Active signal %** |
+|---------|---:|---:|-----:|----:|-----:|--------------------:|
+| single_agent | 0 | 0 | 26 | 0 | 0 | **0%** |
+| market_debate | 13 | 8 | 5 | 0 | 0 | **80.8%** |
+| market_fund | 12 | 11 | 3 | 0 | 0 | **88.5%** |
+| **full_system** | 11 | 13 | 2 | 0 | 0 | **96.2%** |
+
+**Takeaway:** without multi-stage debate / coverage, signals can collapse to **HOLD**; the **full multi-agent** stack yields the highest **active** ratio on this cell — consistent with the report’s ablation narrative.
+
+## References
+
+Numbering and sources follow the **FYP final report** reference list.
+
+1. Hong Kong Exchanges and Clearing Limited, “Local retail participation in HKEx’s stock market remains high,” news release, Apr. 16, 2015. [Link](https://www.hkex.com.hk/News/News-Release/2015/1504162news?sc_lang=en)  
+2. Hong Kong Exchanges and Clearing Limited, “HKEX releases cash market transaction survey 2019,” news release, Nov. 25, 2020. [Link](https://www.hkex.com.hk/News/News-Release/2020/2011253news?sc_lang=en)  
+3. Hong Kong Exchanges and Clearing Limited, *Annual Market Statistics 2024*. [PDF](https://www.hkex.com.hk/-/media/HKEX-Market/Market-Data/Statistics/Consolidated-Reports/Annual-Market-Statistics/2024FY-Ann-Mkt-Stat_eng.pdf)  
+4. Y. Xiao *et al.*, “TradingAgents: Multi-agents LLM financial trading framework,” arXiv:2412.20138, Dec. 2024. [arXiv](https://arxiv.org/abs/2412.20138)  
+5. Y. Du *et al.*, “Improving factuality and reasoning in language models through multiagent debate,” arXiv:2305.14325, 2023.  
+6. H. Li *et al.*, “INVESTORBench: A benchmark for financial decision-making tasks with LLM-based agent,” in *Proc. 63rd Annu. Meeting Assoc. Comput. Linguistics (Long Papers)*, Vienna, Austria, Jul. 2025, pp. 2509–2525.  
+7. M. Mohammadi *et al.*, “Evaluation and benchmarking of LLM agents: A survey,” arXiv:2507.21504, Jul. 2025.  
+8. Z. Chen *et al.*, “Position: Standard benchmarks fail – LLM agents present overlooked risks for financial applications,” arXiv:2502.15865, Jun. 2025.  
+9. Hong Kong Exchanges and Clearing Limited, HKEXnews. [Link](https://www.hkexnews.hk/)  
+10. Hong Kong Exchanges and Clearing Limited, “Trading mechanism.” [Link](https://www.hkex.com.hk/Services/Trading/Securities/Overview/Trading-Mechanism)  
+11. Hong Kong Exchanges and Clearing Limited, “Trading mechanism for VCM,” PDF. [Link](https://www.hkex.com.hk/-/media/HKEX-Market/Services/Trading/Securities/Overview/Trading-Mechanism/Trading-Mechanism-for-VCM_E.pdf)  
+12. TauricResearch, *TradingAgents* (GitHub). [Repo](https://github.com/TauricResearch/TradingAgents)  
+13. Open-Finance-Lab, *AgenticTrading* (GitHub). [Repo](https://github.com/Open-Finance-Lab/AgenticTrading)  
+14. ValueCell-ai, *valuecell* (GitHub). [Repo](https://github.com/ValueCell-ai/valuecell)  
+15. S. He, *StockBuddy_Latest-v4* (GitHub). [Repo](https://github.com/KarenShark/StockBuddy_Latest-v4.git)  
+16. LangChain, “Introduction,” LangChain documentation. [Docs](https://python.langchain.com/docs/introduction/)  
+17. LangChain, LangGraph documentation. [Docs](https://docs.langchain.com/langgraph)  
+18. R. Ran Aroussi, *yfinance* (GitHub). [Repo](https://github.com/ranaroussi/yfinance)  
+19. Finnhub, Finnhub API documentation. [Docs](https://finnhub.io/docs/api)  
+20. NewsData.io, Documentation. [Docs](https://newsdata.io/documentation)  
+21. EODHD, Financial APIs documentation. [Docs](https://eodhd.com/financial-apis/)  
+22. D. Rodríguez, Backtrader. [Site](https://www.backtrader.com/)  
+23. Textualize, Rich documentation. [Docs](https://rich.readthedocs.io/en/stable/)  
+24. Bloomberg L.P., Bloomberg Terminal. [Link](https://www.bloomberg.com/professional/solutions/bloomberg-terminal/)  
+25. LSEG, Refinitiv Workspace. [Link](https://www.lseg.com/en/data-analytics/products/workspace)  
+26. Futu Holdings Limited, moomoo/Futu. [Link](https://www.futunn.com/)  
+27. Interactive Brokers LLC, Interactive Brokers. [Link](https://www.interactivebrokers.com/)  
+28. City University of Hong Kong, “CityUGPT,” accessed Apr. 2, 2026. [Link](https://www.cityu.edu.hk/genai/)
 
 ## Disclaimer
 

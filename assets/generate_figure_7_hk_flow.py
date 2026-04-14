@@ -1,4 +1,4 @@
-"""Regenerate figure-7-hk-market-adaptation-flow.png (English, no overlapping text)."""
+"""Regenerate eval-hk-adaptation-flow.png (English, no overlapping text)."""
 
 from __future__ import annotations
 
@@ -381,7 +381,7 @@ def main() -> None:
         )
         ax.text(lx + 0.42, leg_y + 0.15, lab, va="center", fontsize=9.5, fontweight="bold", color="#334155")
 
-    out = Path(__file__).resolve().parent / "figure-7-hk-market-adaptation-flow.png"
+    out = Path(__file__).resolve().parent / "eval-hk-adaptation-flow.png"
     plt.savefig(
         out,
         dpi=DPI,

@@ -58,11 +58,13 @@ Under `results/<ticker>/<date>/` (e.g. reports, logs): `market_report.md`, `news
 ```bash
 cd "StockBuddy v4"
 python -m venv .venv && source .venv/bin/activate   # or conda
-pip install -r requirements.txt
-pip install -e .
+pip install -r requirements.txt   # editable install + deps from pyproject.toml
 
 cp .env.example .env   # fill keys; never commit .env
 ```
+
+Reproducible installs: **`uv sync`** (uses `uv.lock`) preferred if you use [uv](https://github.com/astral-sh/uv).  
+Optional Streamlit demo: `pip install -e ".[demo]"` then `streamlit run demo/app.py`.
 
 **Interactive CLI + live board:**
 
@@ -98,7 +100,7 @@ Vendors and models live in `stockbuddy/default_config.py` and `.env` (see `.env.
 
 **Adaptation bridge:** long-form outputs (reports, debates, risk text) → compact stance records so **L1–L3** scores are reproducible.
 
-![Adaptation bridge](assets/eval-adaptation-bridge.png)
+<p align="center"><img src="assets/eval-adaptation-bridge.png" alt="Adaptation bridge" width="640"/></p>
 
 **Four layers (sequential):** **L0** is a gate for any downstream claim; **L1–L3** build on it.
 
@@ -111,13 +113,15 @@ Vendors and models live in `stockbuddy/default_config.py` and `.env` (see `.env.
 
 **System & orchestration (report figures):**
 
-| | |
-|--|--|
-| ![System overview](assets/eval-system-overview.png) | ![Sequential multi-agent orchestration](assets/eval-multi-agent-orchestration.png) |
+<p align="center">
+<img src="assets/eval-system-overview.png" alt="System overview" width="380"/>
+&nbsp;&nbsp;
+<img src="assets/eval-multi-agent-orchestration.png" alt="Sequential multi-agent orchestration" width="380"/>
+</p>
 
 **HK data / fee-aware evaluation path (report Figure 8 style):**
 
-![HK market adaptation flow](assets/eval-hk-adaptation-flow.png)
+<p align="center"><img src="assets/eval-hk-adaptation-flow.png" alt="HK market adaptation flow" width="640"/></p>
 
 ### 2. How experiments are run
 
@@ -163,11 +167,11 @@ Risk gates (reported subset): **5 / 27** runs with gate activity (**18.5%**); **
 | HOLD | 2 | 1.9% |
 | SELL | 0 | 0.0% |
 
-![Signal distribution (104 signals)](assets/eval-signal-distribution-104.jpg)
+<p align="center"><img src="assets/eval-signal-distribution-104.jpg" alt="Signal distribution (104 signals)" width="520"/></p>
 
 Spearman rank IC vs forward returns — **not statistically significant** at listed horizons in the report (bootstrap 95% CI):
 
-![Spearman IC with 95% bootstrap CI](assets/eval-spearman-ic-95ci.jpg)
+<p align="center"><img src="assets/eval-spearman-ic-95ci.jpg" alt="Spearman IC with 95% bootstrap CI" width="520"/></p>
 
 #### L2 — Backtest vs baselines (**multi_agent** = StockBuddy full pipeline in table)
 
@@ -196,7 +200,7 @@ Spearman rank IC vs forward returns — **not statistically significant** at lis
 | 0005 | **3.65%** | 4.22% | **−13.5%** |
 | **Mean** | **11.15%** | **19.46%** | **−35.2%** |
 
-![Maximum drawdown comparison across strategies](assets/eval-mdd-by-strategy.jpg)
+<p align="center"><img src="assets/eval-mdd-by-strategy.jpg" alt="Maximum drawdown comparison across strategies" width="520"/></p>
 
 *Total return vs B&H is mixed; the report emphasizes **drawdown control** and **risk-adjusted** metrics rather than raw alpha.*
 

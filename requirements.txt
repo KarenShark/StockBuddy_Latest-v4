@@ -1,28 +1,3 @@
-typing-extensions
-langchain-openai
-langchain-experimental
-pandas
-yfinance
-praw
-feedparser
-stockstats
-eodhd
-langgraph
-chromadb
-setuptools
-backtrader
-akshare
-tushare
-finnhub-python
-parsel
-requests
-tqdm
-pytz
-redis
-chainlit
-rich
-questionary
-langchain_anthropic
-langchain-google-genai
-holidays
-streamlit
+# Installs the package in editable mode; dependencies come from pyproject.toml.
+# Reproducible lockfile: uv.lock — use: uv sync
+-e .

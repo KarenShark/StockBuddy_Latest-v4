@@ -115,24 +115,26 @@ def llm_resolve_ticker(user_input: str, candidates: List[Dict[str, str]], market
         )
         
         candidates_text = "\n".join([
-            f"{i+1}. 代码: {c['code']}, 名称: {c['name']}, 交易所: {c['exchange']}"
+            f"{i+1}. code: {c['code']}, name: {c['name']}, exchange: {c['exchange']}"
             for i, c in enumerate(candidates)
         ])
         
-        system_prompt = f"""你是一个港股交易助手。用户输入了 "{user_input}"，我们找到了以下可能的股票：
+        system_prompt = f"""You help map user input to the correct Hong Kong listing.
 
+User typed: "{user_input}"
+
+Candidates:
 {candidates_text}
 
-请帮助用户选择正确的股票。如果输入明显有误（如用户输入5，但最常见的是0005汇丰控股），
-你应该推荐最可能的那个。
+Pick the best match. If the input is ambiguous (e.g. a short digit), prefer the most liquid / well-known listing.
 
-请直接返回数字序号（1、2、3等），不要有其他文字。
-如果不确定，返回 "1"（第一个候选）。
+Reply with ONLY the option number (1, 2, 3, ...), no other text.
+If unsure, reply "1".
 """
         
         messages = [
             SystemMessage(content=system_prompt),
-            HumanMessage(content=f"用户输入: {user_input}")
+            HumanMessage(content=f"User input: {user_input}")
         ]
         
         response = llm.invoke(messages)
@@ -172,60 +174,51 @@ def smart_ticker_input(user_input: str, interactive: bool = True) -> Tuple[Optio
     if market != 'HKEX':
         return user_input.upper(), None
     
-    # 搜索港股候选项
-    print(f"\n🔍 正在搜索股票代码: {user_input}...")
+    print(f"\n🔍 Looking up ticker: {user_input}...")
     candidates = search_hk_stocks(user_input)
     
     if not candidates:
-        print(f"❌ 未找到匹配的港股代码: {user_input}")
+        print(f"❌ No HKEX match for: {user_input}")
         return None, None
     
-    # 如果只有一个候选
     if len(candidates) == 1:
         stock = candidates[0]
-        print(f"\n✅ 找到股票:")
-        print(f"   代码: {stock['code']}")
-        print(f"   名称: {stock['name']}")
-        print(f"   交易所: {stock['exchange']}")
-        
-        if interactive:
-            confirm = input(f"\n确认分析 {stock['code']} ({stock['name']})? [Y/n]: ").strip().lower()
-            if confirm and confirm not in ['y', 'yes', '']:
-                print("❌ 已取消")
-                return None, None
-        
+        print(f"\n✅ Match found:")
+        print(f"   Code: {stock['code']}")
+        print(f"   Name: {stock['name']}")
+        print(f"   Exchange: {stock['exchange']}")
         return stock['code'], stock['name']
     
-    # 多个候选项，显示给用户选择
-    print(f"\n🤔 找到 {len(candidates)} 个可能的股票:")
+    print(f"\n🤔 {len(candidates)} possible matches:")
     for i, stock in enumerate(candidates, 1):
         print(f"   {i}. {stock['code']} - {stock['name']} ({stock['exchange']})")
     
     if interactive:
         while True:
-            choice = input(f"\n请选择 [1-{len(candidates)}] 或按 q 取消: ").strip()
+            choice = input(
+                f"\nChoose [1-{len(candidates)}] or q to cancel: "
+            ).strip()
             
             if choice.lower() == 'q':
-                print("❌ 已取消")
+                print("Cancelled.")
                 return None, None
             
             try:
                 index = int(choice) - 1
                 if 0 <= index < len(candidates):
                     selected = candidates[index]
-                    print(f"\n✅ 已选择: {selected['code']} - {selected['name']}")
+                    print(f"\n✅ Selected: {selected['code']} - {selected['name']}")
                     return selected['code'], selected['name']
                 else:
-                    print(f"❌ 请输入 1 到 {len(candidates)} 之间的数字")
+                    print(f"❌ Enter a number from 1 to {len(candidates)}")
             except ValueError:
-                print("❌ 请输入有效的数字")
+                print("❌ Enter a valid number")
     else:
-        # 非交互模式，使用LLM自动选择
         resolved = llm_resolve_ticker(user_input, candidates, market)
         if resolved:
             for stock in candidates:
                 if stock['code'] == resolved:
-                    print(f"\n🤖 LLM自动选择: {stock['code']} - {stock['name']}")
+                    print(f"\n🤖 LLM picked: {stock['code']} - {stock['name']}")
                     return stock['code'], stock['name']
         
         # Fallback

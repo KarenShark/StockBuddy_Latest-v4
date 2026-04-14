@@ -47,52 +47,14 @@ def get_finnhub_company_news(
     try:
         client = get_finnhub_client()
         
-        # 检测是否为港股
-        is_hk_stock = False
+        # Normalize HK ticker: 0700 → 0700.HK
         if ticker_symbol.replace('.', '').replace('HK', '').replace('HKG', '').isdigit():
-            is_hk_stock = True
             ticker_clean = ticker_symbol.replace('.HK', '').replace('.HKG', '').zfill(4)
             ticker_formatted = f"{ticker_clean}.HK"
         else:
             ticker_formatted = ticker_symbol
         
-        # 如果是港股，返回提示信息
-        if is_hk_stock:
-            return f"""# ⚠️ Finnhub 免费账户不支持港股
-
-## 股票: {ticker_formatted}
-
-Finnhub 的免费账户无法访问港股（.HK）数据。
-
-### 建议使用以下替代方案：
-
-1. **Google News** - 已集成，自动搜索港股专业媒体
-   - 阿斯达克 (AAStocks)
-   - 信报 (HKEJ)
-   - 经济日报 (HKET)
-   - 经济通 (ET Net)
-
-2. **HKEXnews (披露易)** - 官方公告平台
-   - 所有上市公司必须披露的信息
-   - 最权威的数据来源
-
-3. **升级 Finnhub 账户** - 如需专业港股数据
-   - 访问 https://finnhub.io/pricing
-   - 选择支持香港市场的套餐
-
----
-
-**当前仍可使用 Finnhub 获取**：
-- 美股新闻和数据
-- 部分国际市场新闻
-- 全球市场情绪分析
-
-"""
-        
-        # 转换日期格式为 Finnhub 要求的格式（yyyy-mm-dd）
-        # Finnhub API 接受 yyyy-mm-dd 格式
-        
-        # 获取公司新闻
+        # Let the API try regardless of market; empty result handled below
         news_data = client.company_news(
             symbol=ticker_formatted,
             _from=start_date,
@@ -237,20 +199,13 @@ def get_finnhub_news_sentiment(
     try:
         client = get_finnhub_client()
         
-        # 检测是否为港股
-        is_hk_stock = False
         if ticker_symbol.replace('.', '').replace('HK', '').replace('HKG', '').isdigit():
-            is_hk_stock = True
             ticker_clean = ticker_symbol.replace('.HK', '').replace('.HKG', '').zfill(4)
             ticker_formatted = f"{ticker_clean}.HK"
         else:
             ticker_formatted = ticker_symbol
         
-        # 如果是港股，返回提示
-        if is_hk_stock:
-            return f"# ⚠️ Finnhub 免费账户不支持港股情绪数据\n\n股票: {ticker_formatted}\n\n建议使用 Google News 或社交媒体数据进行情绪分析。\n\n"
-        
-        # 获取新闻情绪
+        # Let API try; empty handled below
         sentiment_data = client.news_sentiment(ticker_formatted)
         
         if not sentiment_data:

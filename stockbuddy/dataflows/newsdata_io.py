@@ -23,7 +23,8 @@ def get_newsdata_news(
     country: Optional[str] = None,  # cn, hk, tw
     category: Optional[List[str]] = None,  # business, technology
     days_back: int = 7,
-    max_results: int = 10
+    max_results: int = 10,
+    template_lang: str = "zh",
 ) -> str:
     """
     从 Newsdata.io 获取新闻
@@ -63,6 +64,7 @@ def get_newsdata_news(
     # 限制结果数量
     params['size'] = min(max_results, 10)  # 免费版限制为10
     
+    en = (template_lang or "zh").lower() == "en"
     try:
         # 发送请求
         response = requests.get(
@@ -72,28 +74,42 @@ def get_newsdata_news(
         )
         
         if response.status_code != 200:
+            if en:
+                return f"❌ Newsdata.io API request failed: HTTP {response.status_code}"
             return f"❌ Newsdata.io API 请求失败: HTTP {response.status_code}"
         
         data = response.json()
         
         if data.get('status') != 'success':
             error_msg = data.get('results', {}).get('message', 'Unknown error')
+            if en:
+                return f"❌ Newsdata.io API error: {error_msg}"
             return f"❌ Newsdata.io API 错误: {error_msg}"
         
         results = data.get('results', [])
         total_results = data.get('totalResults', 0)
         
         if not results:
+            if en:
+                return f"⚠️ No news found for query '{query}'"
             return f"⚠️ 未找到关于 '{query}' 的新闻"
         
-        # 格式化输出
-        report = f"# 📰 Newsdata.io 新闻搜索\n\n"
-        report += f"**搜索关键词**: {query}\n"
-        report += f"**语言**: {language}\n"
-        if country:
-            report += f"**国家/地区**: {country}\n"
-        report += f"**找到**: {total_results} 条新闻 (显示 {len(results)} 条)\n"
-        report += f"**数据来源**: Newsdata.io\n\n"
+        if en:
+            report = f"# 📰 Newsdata.io news search\n\n"
+            report += f"**Query**: {query}\n"
+            report += f"**Language**: {language}\n"
+            if country:
+                report += f"**Region**: {country}\n"
+            report += f"**Found**: {total_results} articles (showing {len(results)})\n"
+            report += f"**Source**: Newsdata.io\n\n"
+        else:
+            report = f"# 📰 Newsdata.io 新闻搜索\n\n"
+            report += f"**搜索关键词**: {query}\n"
+            report += f"**语言**: {language}\n"
+            if country:
+                report += f"**国家/地区**: {country}\n"
+            report += f"**找到**: {total_results} 条新闻 (显示 {len(results)} 条)\n"
+            report += f"**数据来源**: Newsdata.io\n\n"
         report += "---\n\n"
         
         # 格式化每条新闻
@@ -116,31 +132,47 @@ def get_newsdata_news(
                 pub_date_formatted = pub_date
             
             report += f"## {i}. {title}\n\n"
-            report += f"**来源**: {source} | **时间**: {pub_date_formatted}\n"
-            
-            if category_list:
-                report += f"**分类**: {', '.join(category_list)}\n"
-            
-            if description:
-                report += f"\n{description}\n"
-            
-            if link:
-                report += f"\n**链接**: {link}\n"
+            if en:
+                report += f"**Source**: {source} | **Time**: {pub_date_formatted}\n"
+                if category_list:
+                    report += f"**Category**: {', '.join(category_list)}\n"
+                if description:
+                    report += f"\n{description}\n"
+                if link:
+                    report += f"\n**Link**: {link}\n"
+            else:
+                report += f"**来源**: {source} | **时间**: {pub_date_formatted}\n"
+                if category_list:
+                    report += f"**分类**: {', '.join(category_list)}\n"
+                if description:
+                    report += f"\n{description}\n"
+                if link:
+                    report += f"\n**链接**: {link}\n"
             
             report += "\n---\n\n"
         
-        # 添加使用提示
-        report += "## ℹ️ 使用说明\n\n"
-        report += "- 数据来源: Newsdata.io API\n"
-        report += "- 免费版限制: 每次最多 10 条新闻\n"
-        report += "- 完整内容需要付费版 (PAID PLANS)\n"
-        report += "- 情绪分析需要专业版 (PROFESSIONAL PLANS)\n"
+        if en:
+            report += "## ℹ️ Notes\n\n"
+            report += "- Data: Newsdata.io API\n"
+            report += "- Free tier: up to 10 articles per request\n"
+            report += "- Full article text: paid plans\n"
+            report += "- Sentiment: professional plans\n"
+        else:
+            report += "## ℹ️ 使用说明\n\n"
+            report += "- 数据来源: Newsdata.io API\n"
+            report += "- 免费版限制: 每次最多 10 条新闻\n"
+            report += "- 完整内容需要付费版 (PAID PLANS)\n"
+            report += "- 情绪分析需要专业版 (PROFESSIONAL PLANS)\n"
         
         return report
         
     except requests.RequestException as e:
+        if en:
+            return f"❌ Newsdata.io request error: {str(e)}"
         return f"❌ Newsdata.io 请求异常: {str(e)}"
     except Exception as e:
+        if en:
+            return f"❌ Newsdata.io processing failed: {str(e)}"
         return f"❌ Newsdata.io 处理失败: {str(e)}"
 
 
@@ -185,7 +217,8 @@ def get_newsdata_hk_stock_news(
 def get_newsdata_market_news(
     query: str = "港股 OR 恒生指数 OR 香港股市",
     days_back: int = 3,
-    max_results: int = 10
+    max_results: int = 10,
+    template_lang: str = "zh",
 ) -> str:
     """
     获取港股市场整体新闻
@@ -204,7 +237,8 @@ def get_newsdata_market_news(
         country="cn,hk,tw",
         category=["business"],
         days_back=days_back,
-        max_results=max_results
+        max_results=max_results,
+        template_lang=template_lang,
     )
     
     return report

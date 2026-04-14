@@ -6,6 +6,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import json
 from .reddit_utils import fetch_top_from_category
+from .news_window_policy import analysis_end_is_historical, meta_line
 from tqdm import tqdm
 
 def get_YFin_data_window(
@@ -371,16 +372,24 @@ def get_reddit_global_news(
     limit: Annotated[int, "Maximum number of articles to return"] = 5,
 ) -> str:
     """
-    Retrieve the latest top reddit news
-    Args:
-        curr_date: Current date in yyyy-mm-dd format
-        look_back_days: Number of days to look back (default 7)
-        limit: Maximum number of articles to return (default 5)
-    Returns:
-        str: A formatted string containing the latest news articles posts on reddit
+    Offline reddit corpus by calendar day. Disabled for historical backtests (untrusted coverage).
+    Returns STOCKBUDDY_NEWS_JSON header (never raises).
     """
+    cd = str(curr_date).strip()
+    if analysis_end_is_historical(cd):
+        return (
+            meta_line(
+                {
+                    "status": "empty_window",
+                    "scope": "global",
+                    "provider": "reddit_local",
+                    "detail": "skipped_historical_mode",
+                }
+            )
+            + "\n\nReddit global feed skipped in historical mode (no fabricated body)."
+        )
 
-    curr_date_dt = datetime.strptime(curr_date, "%Y-%m-%d")
+    curr_date_dt = datetime.strptime(cd, "%Y-%m-%d")
     before = curr_date_dt - relativedelta(days=look_back_days)
     before = before.strftime("%Y-%m-%d")
 
@@ -406,7 +415,18 @@ def get_reddit_global_news(
     pbar.close()
 
     if len(posts) == 0:
-        return ""
+        return (
+            meta_line(
+                {
+                    "status": "empty_window",
+                    "scope": "global",
+                    "provider": "reddit_local",
+                    "count": 0,
+                    "window": f"{before}..{cd}",
+                }
+            )
+            + "\n\nNo reddit posts in local corpus for this window."
+        )
 
     news_str = ""
     for post in posts:
@@ -415,7 +435,16 @@ def get_reddit_global_news(
         else:
             news_str += f"### {post['title']}\n\n{post['content']}\n\n"
 
-    return f"## Global News Reddit, from {before} to {curr_date}:\n{news_str}"
+    hdr = meta_line(
+        {
+            "status": "ok",
+            "scope": "global",
+            "provider": "reddit_local",
+            "count": len(posts),
+            "window": f"{before}..{cd}",
+        }
+    )
+    return f"{hdr}\n\n## Global News Reddit, from {before} to {cd}:\n{news_str}"
 
 
 def get_reddit_company_news(

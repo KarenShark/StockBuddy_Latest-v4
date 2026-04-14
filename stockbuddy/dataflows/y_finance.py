@@ -319,12 +319,26 @@ def get_stockstats_indicator(
     return str(indicator_value)
 
 
+def _filter_future_columns(data, curr_date_str):
+    """Drop financial statement columns dated after curr_date to prevent look-ahead."""
+    if not curr_date_str or data.empty:
+        return data
+    try:
+        cutoff = datetime.strptime(curr_date_str, "%Y-%m-%d")
+    except ValueError:
+        return data
+    keep = [c for c in data.columns if c <= cutoff]
+    if not keep:
+        return data.iloc[:, :0]  # empty but preserves index
+    return data[keep]
+
+
 def get_balance_sheet(
     ticker: Annotated[str, "ticker symbol of the company"],
     freq: Annotated[str, "frequency of data: 'annual' or 'quarterly'"] = "quarterly",
-    curr_date: Annotated[str, "current date (not used for yfinance)"] = None
+    curr_date: Annotated[str, "analysis date yyyy-mm-dd; columns after this are dropped"] = None
 ):
-    """Get balance sheet data from yfinance."""
+    """Get balance sheet data from yfinance. Filters out future quarters if curr_date set."""
     try:
         normalized_ticker = normalize_ticker_for_market(ticker)
         ticker_obj = yf.Ticker(normalized_ticker)
@@ -336,12 +350,16 @@ def get_balance_sheet(
             
         if data.empty:
             return f"No balance sheet data found for symbol '{ticker}'"
+
+        data = _filter_future_columns(data, curr_date)
+        if data.empty:
+            return f"No balance sheet data available for '{ticker}' on or before {curr_date}"
             
-        # Convert to CSV string for consistency with other functions
         csv_string = data.to_csv()
         
-        # Add header information
         header = f"# Balance Sheet data for {ticker.upper()} ({freq})\n"
+        if curr_date:
+            header += f"# Point-in-time cutoff: {curr_date}\n"
         header += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
         
         return header + csv_string
@@ -353,9 +371,9 @@ def get_balance_sheet(
 def get_cashflow(
     ticker: Annotated[str, "ticker symbol of the company"],
     freq: Annotated[str, "frequency of data: 'annual' or 'quarterly'"] = "quarterly",
-    curr_date: Annotated[str, "current date (not used for yfinance)"] = None
+    curr_date: Annotated[str, "analysis date yyyy-mm-dd; columns after this are dropped"] = None
 ):
-    """Get cash flow data from yfinance."""
+    """Get cash flow data from yfinance. Filters out future quarters if curr_date set."""
     try:
         normalized_ticker = normalize_ticker_for_market(ticker)
         ticker_obj = yf.Ticker(normalized_ticker)
@@ -367,12 +385,16 @@ def get_cashflow(
             
         if data.empty:
             return f"No cash flow data found for symbol '{ticker}'"
+
+        data = _filter_future_columns(data, curr_date)
+        if data.empty:
+            return f"No cash flow data available for '{ticker}' on or before {curr_date}"
             
-        # Convert to CSV string for consistency with other functions
         csv_string = data.to_csv()
         
-        # Add header information
         header = f"# Cash Flow data for {ticker.upper()} ({freq})\n"
+        if curr_date:
+            header += f"# Point-in-time cutoff: {curr_date}\n"
         header += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
         
         return header + csv_string
@@ -384,9 +406,9 @@ def get_cashflow(
 def get_income_statement(
     ticker: Annotated[str, "ticker symbol of the company"],
     freq: Annotated[str, "frequency of data: 'annual' or 'quarterly'"] = "quarterly",
-    curr_date: Annotated[str, "current date (not used for yfinance)"] = None
+    curr_date: Annotated[str, "analysis date yyyy-mm-dd; columns after this are dropped"] = None
 ):
-    """Get income statement data from yfinance."""
+    """Get income statement data from yfinance. Filters out future quarters if curr_date set."""
     try:
         normalized_ticker = normalize_ticker_for_market(ticker)
         ticker_obj = yf.Ticker(normalized_ticker)
@@ -398,12 +420,16 @@ def get_income_statement(
             
         if data.empty:
             return f"No income statement data found for symbol '{ticker}'"
+
+        data = _filter_future_columns(data, curr_date)
+        if data.empty:
+            return f"No income statement data available for '{ticker}' on or before {curr_date}"
             
-        # Convert to CSV string for consistency with other functions
         csv_string = data.to_csv()
         
-        # Add header information
         header = f"# Income Statement data for {ticker.upper()} ({freq})\n"
+        if curr_date:
+            header += f"# Point-in-time cutoff: {curr_date}\n"
         header += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
         
         return header + csv_string
@@ -439,18 +465,12 @@ def get_insider_transactions(
 
 def get_fundamentals(
     ticker: Annotated[str, "ticker symbol of the company"],
-    curr_date: Annotated[str, "current date (not used for yfinance)"] = None
+    curr_date: Annotated[str, "analysis date yyyy-mm-dd (note: yfinance .info is always real-time)"] = None
 ) -> str:
     """
     Get comprehensive fundamental data for a company using yfinance.
-    This provides company overview and key financial metrics.
-    
-    Args:
-        ticker: Ticker symbol of the company
-        curr_date: Current date (not used for yfinance)
-        
-    Returns:
-        Formatted string with comprehensive fundamental data
+    WARNING: yfinance .info returns a real-time snapshot — not point-in-time.
+    Price-derived metrics (P/E, Market Cap, 52-week range) reflect today, not curr_date.
     """
     try:
         normalized_ticker = normalize_ticker_for_market(ticker)
@@ -460,9 +480,14 @@ def get_fundamentals(
         if not info or len(info) < 3:
             return f"No fundamental data found for symbol '{ticker}' ({normalized_ticker})"
         
-        # Build comprehensive fundamental report
         report = f"# Comprehensive Fundamental Data for {normalized_ticker}\n"
-        report += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        report += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+        if curr_date:
+            report += (
+                f"# ⚠️ WARNING: This is a REAL-TIME snapshot, NOT point-in-time as of {curr_date}.\n"
+                f"# Price-derived metrics (P/E, Market Cap, target prices) reflect today's values.\n"
+            )
+        report += "\n"
         
         # Company Information
         report += "## Company Information\n"

@@ -26,7 +26,7 @@ setup(
     python_requires=">=3.10",
     entry_points={
         "console_scripts": [
-            "stockbuddy=cli.main:app",
+            "stockbuddy=cli.main:stockbuddy_cli",
         ],
     },
     classifiers=[

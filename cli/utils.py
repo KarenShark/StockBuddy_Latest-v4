@@ -1,7 +1,82 @@
+import datetime
 import questionary
-from typing import List, Optional, Tuple, Dict
+from pathlib import Path
+from typing import List, Optional, Tuple
+
+from rich.console import Console
+from rich.panel import Panel
+from rich import box
+from rich.align import Align
+from rich.theme import Theme
 
 from cli.models import AnalystType
+
+# Claude Code–adjacent: warm cream + terracotta on typical dark terminals
+CLI_BORDER = "#b85c3a"
+CLI_BORDER_SOFT = "#5c5348"
+CLI_TITLE = "bold #f0e8df"
+CLI_ACCENT = "#c9a882"
+CLI_MUTED = "dim #8f877c"
+
+console = Console(
+    theme=Theme(
+        {
+            "cli.title": CLI_TITLE,
+            "cli.border": CLI_BORDER,
+            "cli.muted": CLI_MUTED,
+            "cli.accent": CLI_ACCENT,
+        }
+    )
+)
+
+# Menus: arrow keys; warm accent (shared with research_console follow-up)
+QUESTIONARY_CYAN_MENU_STYLE = questionary.Style(
+    [
+        ("selected", "fg:#d4896c bold noinherit"),
+        ("highlighted", "fg:#d4896c noinherit"),
+        ("pointer", "fg:#e8a87c noinherit"),
+    ]
+)
+QUESTIONARY_CYAN_TEXT_STYLE = questionary.Style(
+    [
+        ("text", "fg:#d4c4b0"),
+        ("highlighted", "noinherit"),
+    ]
+)
+
+
+def _welcome_txt_path() -> Path:
+    return Path(__file__).resolve().parent / "static" / "welcome.txt"
+
+
+def print_welcome_banner(variant: str = "research") -> None:
+    """与 analyze 相同：ASCII + DOUBLE_EDGE；variant 只改中部说明行。"""
+    p = _welcome_txt_path()
+    welcome_ascii = p.read_text(encoding="utf-8") if p.is_file() else ""
+    welcome_content = f"{welcome_ascii}\n"
+    welcome_content += f"[{CLI_TITLE}]StockBuddy: multi-agent LLM Trading Assistant[/]\n\n"
+    if variant == "hub":
+        welcome_content += f"[{CLI_ACCENT}]Terminal hub[/]\n"
+        welcome_content += (
+            f"[{CLI_MUTED}]• Research — multi-agent pipeline + Live board[/]\n\n"
+        )
+    else:
+        welcome_content += f"[{CLI_ACCENT}]Workflow Pipeline:[/]\n"
+        welcome_content += (
+            f"[{CLI_MUTED}]I. Analyst Team → II. Research Team → III. Trader → "
+            f"IV. Risk Management → V. Portfolio Management[/]\n\n"
+        )
+    welcome_content += f"[{CLI_MUTED}]Built by Siyu HE[/]"
+    welcome_box = Panel(
+        welcome_content,
+        border_style=CLI_BORDER,
+        box=box.DOUBLE_EDGE,
+        padding=(1, 2),
+        title=f"[{CLI_TITLE}]╔═══ Welcome to StockBuddy ═══╗[/]",
+        subtitle=f"[{CLI_MUTED}]multi-agent LLM Trading Assistant[/]",
+    )
+    console.print(Align.center(welcome_box))
+    console.print()
 
 ANALYST_ORDER = [
     ("Market Analyst", AnalystType.MARKET),
@@ -145,9 +220,38 @@ def select_shallow_thinking_agent(provider) -> str:
             ("Gemini 2.5 Flash - Adaptive thinking, cost efficiency", "gemini-2.5-flash-preview-05-20"),
         ],
         "openrouter": [
-            ("Meta: Llama 4 Scout", "meta-llama/llama-4-scout:free"),
-            ("Meta: Llama 3.3 8B Instruct - A lightweight and ultra-fast variant of Llama 3.3 70B", "meta-llama/llama-3.3-8b-instruct:free"),
-            ("google/gemini-2.0-flash-exp:free - Gemini Flash 2.0 offers a significantly faster time to first token", "google/gemini-2.0-flash-exp:free"),
+            (
+                "openai/gpt-4o-mini - pay-as-you-go, fewer 429s",
+                "openai/gpt-4o-mini",
+            ),
+            (
+                "google/gemini-2.0-flash-001 - pay-as-you-go",
+                "google/gemini-2.0-flash-001",
+            ),
+            (
+                "anthropic/claude-3.5-haiku - pay-as-you-go",
+                "anthropic/claude-3.5-haiku",
+            ),
+            (
+                "meta-llama/llama-3.3-70b-instruct - paid (not :free)",
+                "meta-llama/llama-3.3-70b-instruct",
+            ),
+            (
+                "deepseek/deepseek-chat - pay-as-you-go",
+                "deepseek/deepseek-chat",
+            ),
+            (
+                "Llama 3.3 70B (free) - tight limits, often 429",
+                "meta-llama/llama-3.3-70b-instruct:free",
+            ),
+            (
+                "Llama 3.3 8B (free) - tight limits, often 429",
+                "meta-llama/llama-3.3-8b-instruct:free",
+            ),
+            (
+                "google/gemini-2.0-flash-exp (free) - tight limits, often 429",
+                "google/gemini-2.0-flash-exp:free",
+            ),
         ],
         "ollama": [
             ("llama3.1 local", "llama3.1"),
@@ -199,7 +303,7 @@ def select_deep_thinking_agent(provider) -> str:
             ("Claude Sonnet 3.5 - Highly capable standard model", "claude-3-5-sonnet-latest"),
             ("Claude Sonnet 3.7 - Exceptional hybrid reasoning and agentic capabilities", "claude-3-7-sonnet-latest"),
             ("Claude Sonnet 4 - High performance and excellent reasoning", "claude-sonnet-4-0"),
-            ("Claude Opus 4 - Most powerful Anthropic model", "	claude-opus-4-0"),
+            ("Claude Opus 4 - Most powerful Anthropic model", "claude-opus-4-0"),
         ],
         "google": [
             ("Gemini 2.0 Flash-Lite - Cost efficiency and low latency", "gemini-2.0-flash-lite"),
@@ -208,8 +312,30 @@ def select_deep_thinking_agent(provider) -> str:
             ("Gemini 2.5 Pro", "gemini-2.5-pro-preview-06-05"),
         ],
         "openrouter": [
-            ("DeepSeek V3 - a 685B-parameter, mixture-of-experts model", "deepseek/deepseek-chat-v3-0324:free"),
-            ("Deepseek - latest iteration of the flagship chat model family from the DeepSeek team.", "deepseek/deepseek-chat-v3-0324:free"),
+            (
+                "openai/gpt-4o - reasoning, long context, pay-as-you-go",
+                "openai/gpt-4o",
+            ),
+            (
+                "anthropic/claude-3.5-sonnet - pay-as-you-go",
+                "anthropic/claude-3.5-sonnet",
+            ),
+            (
+                "deepseek/deepseek-chat - pay-as-you-go",
+                "deepseek/deepseek-chat",
+            ),
+            (
+                "openai/o1-mini - reasoning, pay-as-you-go",
+                "openai/o1-mini",
+            ),
+            (
+                "meta-llama/llama-3.3-70b-instruct - pay-as-you-go",
+                "meta-llama/llama-3.3-70b-instruct",
+            ),
+            (
+                "DeepSeek V3 (free) - tight limits, often 429",
+                "deepseek/deepseek-chat-v3-0324:free",
+            ),
         ],
         "ollama": [
             ("llama3.1 local", "llama3.1"),
@@ -271,6 +397,6 @@ def select_llm_provider() -> tuple[str, str]:
         exit(1)
     
     display_name, url = choice
-    print(f"You selected: {display_name}\tURL: {url}")
-    
+    console.print(f"You selected: {display_name}\tURL: {url}")
+
     return display_name, url

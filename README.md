@@ -38,14 +38,18 @@ Full walkthrough (terminal flow, modes, evaluation framing): **[YouTube — Stoc
 
 ## Terminal flow (screenshots)
 
+GFM **markdown table** (`Step` \| `What you see`) so GitHub draws the **grid lines** around each cell (HTML-only `border=` is often stripped on github.com).
+
 | Step | What you see |
-|------|----------------|
-| Hub, ticker resolve, date | ![Hub](assets/demo-01-hub-ticker-date.png) |
-| Analysts, depth, provider | ![Setup](assets/demo-02-analysts-depth-provider.png) |
-| Live board (in progress) | ![Board](assets/demo-03-live-board-in-progress.png) |
-| Portfolio line + follow-up entry | ![Decision](assets/demo-04-portfolio-decision-complete.png) |
-| Risk + suggested follow-ups | ![Risk](assets/demo-05-risk-decision-followup-menu.png) |
-| Grounded Q&A | ![Q&A](assets/demo-06-followup-qa-grounded.png) |
+|:-----|:------------:|
+| **Figure 1.** Hub, ticker resolve, date | <img src="assets/demo-01-hub-ticker-date.png" alt="Hub" width="680" /> |
+| **Figure 2.** Analysts, depth, provider | <img src="assets/demo-02-analysts-depth-provider.png" alt="Analysts setup" width="680" /> |
+| **Figure 3.** Live board (in progress) | <img src="assets/demo-03-live-board-in-progress.png" alt="Live board" width="680" /> |
+| **Figure 4.** Portfolio line + follow-up entry | <img src="assets/demo-04-portfolio-decision-complete.png" alt="Portfolio decision" width="680" /> |
+| **Figure 5.** Risk + suggested follow-ups | <img src="assets/demo-05-risk-decision-followup-menu.png" alt="Risk and follow-up" width="680" /> |
+| **Figure 6.** Grounded follow-up Q&A | <img src="assets/demo-06-followup-qa-grounded.png" alt="Follow-up Q&A" width="680" /> |
+
+<p align="center"><i>Figures 1–6. Terminal workflow: hub → configuration → live board → portfolio → risk/follow-up menu → artifact-grounded Q&amp;A.</i></p>
 
 ## Written artifacts (example layout)
 
@@ -100,7 +104,9 @@ Vendors and models live in `stockbuddy/default_config.py` and `.env` (see `.env.
 
 **Adaptation bridge:** long-form outputs (reports, debates, risk text) → compact stance records so **L1–L3** scores are reproducible.
 
-<p align="center"><img src="assets/eval-adaptation-bridge.png" alt="Adaptation bridge" width="640"/></p>
+| Adaptation bridge (concept) |
+|:---------------------------:|
+| <img src="assets/eval-adaptation-bridge.png" alt="Adaptation bridge" width="640" /> |
 
 **Four layers (sequential):** **L0** is a gate for any downstream claim; **L1–L3** build on it.
 
@@ -111,17 +117,20 @@ Vendors and models live in `stockbuddy/default_config.py` and `.env` (see `.env.
 | **L2** | Fee-aware paths | total return, Sharpe, **max drawdown**, Calmar vs **Buy & Hold** & **MACD** |
 | **L3** | Ablations | stance mix by variant; **active-signal ratio** (non-HOLD share) |
 
-**System & orchestration (report figures):**
+**System & orchestration (report figures):** one **two-column markdown table** so both panels sit in bordered cells side by side — **left cell wider** (system overview), **right cell** (ASCII control-flow).
 
-<p align="center">
-<img src="assets/eval-system-overview.png" alt="System overview" width="380"/>
-&nbsp;&nbsp;
-<img src="assets/eval-multi-agent-orchestration.png" alt="Sequential multi-agent orchestration" width="380"/>
-</p>
+| System overview | Multi-agent sequential orchestration |
+|:----------------:|:-----------------------------------:|
+| <img src="assets/eval-system-overview.png" alt="System overview" width="560" /> | <img src="assets/eval-multi-agent-orchestration.png" alt="Sequential multi-agent orchestration" width="380" /> |
+
+<p align="center"><i>Figure 7. System overview (left) and sequential orchestration control flow (right).</i></p>
 
 **HK data / fee-aware evaluation path (report Figure 8 style):**
 
-<p align="center"><img src="assets/eval-hk-adaptation-flow.png" alt="HK market adaptation flow" width="640"/></p>
+| HK data / fee-aware path |
+|:------------------------:|
+| <img src="assets/eval-hk-adaptation-flow.png" alt="HK market adaptation flow" width="640" /> |
+<p align="center"><i>Figure 8. Hong Kong data path, merged news, and fee-aware evaluation context.</i></p>
 
 ### 2. How experiments are run
 
@@ -159,19 +168,19 @@ Risk gates (reported subset): **5 / 27** runs with gate activity (**18.5%**); **
 
 #### L1 — Phase II stance distribution (104 signals, four tickers)
 
-| Stance | Count | Share |
-|--------|------:|------:|
-| OVERWEIGHT | 54 | 51.9% |
-| UNDERWEIGHT | 46 | 44.2% |
-| BUY | 2 | 1.9% |
-| HOLD | 2 | 1.9% |
-| SELL | 0 | 0.0% |
+| Stance × count (104 signals) | Five-way distribution (pie) |
+|:-----------------------------|:----------------------------:|
+| <table><thead><tr><th align="left">Stance</th><th align="right">Count</th><th align="right">Share</th></tr></thead><tbody><tr><td>OVERWEIGHT</td><td align="right">54</td><td align="right">51.9%</td></tr><tr><td>UNDERWEIGHT</td><td align="right">46</td><td align="right">44.2%</td></tr><tr><td>BUY</td><td align="right">2</td><td align="right">1.9%</td></tr><tr><td>HOLD</td><td align="right">2</td><td align="right">1.9%</td></tr><tr><td>SELL</td><td align="right">0</td><td align="right">0.0%</td></tr></tbody></table> | <img src="assets/eval-signal-distribution-104.jpg" alt="Signal distribution (104 signals)" width="440" /> |
 
-<p align="center"><img src="assets/eval-signal-distribution-104.jpg" alt="Signal distribution (104 signals)" width="520"/></p>
+<p align="center"><i>Figure 9. Phase II stance counts (left) and five-way distribution (right; 104 pooled signals, four tickers).</i></p>
 
-Spearman rank IC vs forward returns — **not statistically significant** at listed horizons in the report (bootstrap 95% CI):
+Spearman rank IC vs forward returns — **not statistically significant** at listed horizons in the report (bootstrap 95% CI). *Interpretation:* among the horizons reported, the **5-day** window shows the **highest mean IC** (the only horizon with a positive point estimate in this plot); longer windows drift negative — still **noise-dominated** under bootstrap CIs, so this is a **relative** pattern within the protocol, not a claim of significant predictive power.
 
-<p align="center"><img src="assets/eval-spearman-ic-95ci.jpg" alt="Spearman IC with 95% bootstrap CI" width="520"/></p>
+| Spearman rank IC (bootstrap 95% CI) |
+|:-----------------------------------:|
+| <img src="assets/eval-spearman-ic-95ci.jpg" alt="Spearman IC with 95% bootstrap CI" width="520" /> |
+
+<p align="center"><i>Figure 10. Spearman rank IC vs forward returns with bootstrap 95% confidence intervals by horizon.</i></p>
 
 #### L2 — Backtest vs baselines (**multi_agent** = StockBuddy full pipeline in table)
 
@@ -200,7 +209,11 @@ Spearman rank IC vs forward returns — **not statistically significant** at lis
 | 0005 | **3.65%** | 4.22% | **−13.5%** |
 | **Mean** | **11.15%** | **19.46%** | **−35.2%** |
 
-<p align="center"><img src="assets/eval-mdd-by-strategy.jpg" alt="Maximum drawdown comparison across strategies" width="520"/></p>
+| Maximum drawdown vs strategies |
+|:------------------------------:|
+| <img src="assets/eval-mdd-by-strategy.jpg" alt="Maximum drawdown comparison across strategies" width="520" /> |
+
+<p align="center"><i>Figure 11. Maximum drawdown comparison across strategies (multi-agent vs baselines).</i></p>
 
 *Total return vs B&H is mixed; the report emphasizes **drawdown control** and **risk-adjusted** metrics rather than raw alpha.*
 
